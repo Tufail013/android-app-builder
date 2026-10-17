@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#e6e9ef"><title>Android App Builder</title>
+<style>
+:root{--bg:#e6e9ef;--s1:#c3c9d6;--s2:#fff;--tx:#2b3140;--mut:#667085;--acc:#0e7490;--on:#fff;--bad:#c0392b;--warn:#9a6b00;color-scheme:light}
+html[data-theme=dark]{--bg:#1f232b;--s1:#14171c;--s2:#2a2f39;--tx:#e8ecf3;--mut:#9aa4b5;--acc:#22d3ee;--on:#00222a;--bad:#ff8a8a;--warn:#f5c26b;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;overflow-x:hidden;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:96px;transition:background .3s,color .3s}
+header,main{max-width:720px;margin:auto;padding:14px 18px}h1{font-size:21px;margin:0;font-weight:700}h2{font-size:18px;margin:0 0 8px}
+.card{background:var(--bg);border-radius:24px;padding:18px;margin:18px 0;box-shadow:7px 7px 16px var(--s1),-7px -7px 16px var(--s2)}
+label{display:block;font-weight:600;margin:14px 0 6px}small{display:block;color:var(--mut);font-weight:400;font-size:13px;margin-top:2px}
+input[type=text],select,textarea{width:100%;background:var(--bg);color:var(--tx);border:0;border-radius:14px;padding:13px 14px;font:inherit;min-height:46px;box-shadow:inset 4px 4px 9px var(--s1),inset -4px -4px 9px var(--s2)}
+input[type=file]{width:100%;color:var(--mut)}textarea{font:13px/1.45 ui-monospace,monospace;min-height:220px}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+button{background:var(--acc);color:var(--on);border:0;border-radius:14px;padding:10px 18px;font-weight:600;font-size:15px;min-height:46px;cursor:pointer;box-shadow:5px 5px 12px var(--s1),-5px -5px 12px var(--s2);transition:transform .12s,box-shadow .12s}
+button:active:not(:disabled){transform:scale(.97);box-shadow:inset 3px 3px 7px #0004,inset -3px -3px 7px #fff3}
+button.g,button.d{background:var(--bg);color:var(--tx)}button.d{color:var(--bad)}
+button.g:active:not(:disabled),button.d:active:not(:disabled){box-shadow:inset 4px 4px 9px var(--s1),inset -4px -4px 9px var(--s2)}
+button:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
+.row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0;margin:0;font-weight:400}.row b{display:block}.row>span{flex:1;min-width:0;overflow-wrap:anywhere}
+.row input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:none;width:54px;height:30px;border-radius:15px;margin:0;position:relative;cursor:pointer;background:var(--bg);box-shadow:inset 3px 3px 7px var(--s1),inset -3px -3px 7px var(--s2)}
+.row input[type=checkbox]::before{content:"";position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:var(--bg);box-shadow:2px 2px 5px var(--s1),-1px -1px 4px var(--s2);transition:transform .28s cubic-bezier(.3,1.5,.5,1),background .25s}
+.row input[type=checkbox]:checked::before{transform:translateX(24px);background:var(--acc)}.row input[type=checkbox]:disabled{opacity:.5}
+.err{color:var(--bad);font-size:13px}.wr{color:var(--warn);font-size:13px;margin:6px 0;padding-left:18px}
+.bar{height:10px;border-radius:10px;overflow:hidden;box-shadow:inset 2px 2px 5px var(--s1),inset -2px -2px 5px var(--s2)}.bar i{display:block;height:100%;border-radius:10px;background:var(--acc);transition:width .45s cubic-bezier(.3,1,.4,1)}
+.top{display:flex;gap:12px;align-items:center;margin-bottom:14px}.cyc{margin-left:auto}
+#nav{position:fixed;left:0;right:0;bottom:0;background:var(--bg);padding:12px 18px calc(12px + env(safe-area-inset-bottom));display:flex;gap:14px;justify-content:center;box-shadow:0 -4px 14px var(--s1)}#nav:empty{display:none}#nav button{flex:1;max-width:340px}
+iframe{width:100%;height:280px;border:0;border-radius:16px;background:#fff;box-shadow:3px 3px 8px var(--s1),-3px -3px 8px var(--s2)}
+details{margin-top:14px}summary{padding:12px 0;font-weight:600;cursor:pointer}
+.cr{display:flex;gap:10px}.cr input[type=color]{width:52px;height:46px;border:0;background:none;padding:0}
+.pre{display:flex;gap:12px;margin-top:12px}.pre button{width:36px;min-height:36px;padding:0;border-radius:50%;box-shadow:3px 3px 7px var(--s1),-3px -3px 7px var(--s2)}
+.imgb{display:flex;gap:14px;align-items:center}.th{width:72px;height:72px;border-radius:18px;object-fit:cover;flex:none;box-shadow:3px 3px 8px var(--s1),-3px -3px 8px var(--s2)}
+.def{display:grid;place-items:center;background:var(--bg);font-weight:700;color:var(--acc);box-shadow:inset 3px 3px 7px var(--s1),inset -3px -3px 7px var(--s2)}
+.phone{width:180px;height:320px;margin:12px auto;border-radius:26px;overflow:hidden;display:flex;flex-direction:column;position:relative;box-shadow:7px 7px 16px var(--s1),-7px -7px 16px var(--s2)}.phone.land{width:320px;height:180px;max-width:100%}
+.sb{height:18px;font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:0 8px}.ab{height:30px;font-size:12px;display:flex;align-items:center;padding:0 8px}.nb{height:16px}
+.bd{flex:1;display:flex;align-items:center;justify-content:center;font-size:12px;color:#888}
+.ring{border-radius:50%;border-style:solid;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.dots{display:flex;gap:4px}.dots i{width:8px;height:8px;border-radius:50%;background:currentColor;animation:bl 1s infinite}.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}@keyframes bl{50%{opacity:.2}}
+.ind{height:100%;width:40%;animation:mv 1.2s linear infinite}@keyframes mv{from{margin-left:-40%}to{margin-left:100%}}
+.sum h3{margin:0;font-size:16px;display:flex;justify-content:space-between;align-items:center}.sum dl{margin:10px 0 0;display:grid;grid-template-columns:120px 1fr;gap:4px 10px;font-size:14px}.sum dt{color:var(--mut)}.sum dd{margin:0;word-break:break-word}
+.seg{display:flex;gap:6px;padding:6px;border-radius:18px;margin-top:14px;box-shadow:inset 3px 3px 7px var(--s1),inset -3px -3px 7px var(--s2)}
+.seg button{flex:1;background:transparent;color:var(--mut);box-shadow:none;min-height:38px;padding:6px 10px}.seg button.on{background:var(--bg);color:var(--acc);box-shadow:3px 3px 7px var(--s1),-3px -3px 7px var(--s2)}.seg button:active:not(:disabled){box-shadow:none}
+#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(10px);background:var(--bg);color:var(--tx);padding:11px 18px;border-radius:16px;opacity:0;pointer-events:none;transition:.25s;max-width:90%;text-align:center;z-index:10;box-shadow:6px 6px 14px var(--s1),-6px -6px 14px var(--s2)}#toast.show{opacity:1;transform:translateX(-50%)}#toast.bad{color:var(--bad)}
+.cf{position:fixed;left:50%;top:60%;width:8px;height:12px;border-radius:2px;pointer-events:none;z-index:11;animation:cf .9s cubic-bezier(.2,.8,.3,1) forwards}@keyframes cf{to{transform:translate(var(--x),var(--y)) rotate(var(--r));opacity:0}}
+@keyframes inx{from{opacity:0;transform:translateX(16px)}}.sw{animation:inx .3s ease}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<header id="hd"></header><main id="app"></main><footer id="nav"></footer><div id="toast" role="status"></div>
+<input type="file" id="imp" accept=".json,application/json" hidden>
+<script>
+'use strict';
+/* ===== helpers ===== */
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const get=(o,p)=>p.split('.').reduce((a,k)=>a?.[k],o),set=(o,p,v)=>{const a=p.split('.'),l=a.pop();a.reduce((x,k)=>x[k],o)[l]=v};
+const HEXR=/^#[0-9a-f]{6}$/i,C=c=>HEXR.test(c)?c:'#000000',IMGR=/^data:image\/(png|jpeg|webp|gif);base64,/;
+let tt;function toast(m,bad){const t=$('#toast');t.textContent=m;t.className='show'+(bad?' bad':'');clearTimeout(tt);tt=setTimeout(()=>t.className='',3500)}
+/* ===== templates ===== */
+const H=(t,b)=>`<!DOCTYPE html>\n<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${t}</title></head>\n<body style="font-family:sans-serif;padding:16px">\n${b}\n</body></html>`;
+const TPL={blank:{n:'Blank',h:H('My App','<h1>Hello</h1>')},
+welcome:{n:'Welcome page',h:H('Welcome','<h1>Welcome</h1><p>Edit this page, then continue the wizard.</p><a href="#more">More</a><p id="more">Hidden section.</p>')},
+counter:{n:'Counter app',h:H('Counter','<h1 id="n">0</h1><button onclick="n.textContent=+n.textContent+1" style="font-size:24px;padding:12px 24px">+1</button>')}};
+/* ===== data model (UI independent) ===== */
+const blank=name=>({id:uid(),name,created:Date.now(),updated:Date.now(),step:0,
+app:{name:'',pkg:'',vc:'1',vn:'1.0.0',auto:true,min:'24',target:'34',max:'',scheme:''},
+src:{type:'blank',file:'',html:TPL.blank.h},
+disp:{orient:'auto',status:true,action:false,keepOn:false,cutout:'default',desktop:false,wm:false,primary:'#22d3ee',loadBg:'#000000',statusColor:'#000000',navColor:'#000000',transp:false,tint:'auto'},
+perms:['INTERNET','ACCESS_NETWORK_STATE'],icon:{name:'',data:''},
+splash:{on:true,bg:'#000000',style:'ring',loader:'#22d3ee',ring:'#333333',img:{name:'',data:''},iconSize:'96',radius:'20',loaderSize:'40',gap:'24',dur:'2000',thick:'4',fade:'300'},
+wv:{refresh:true,noNet:true,indicator:true,backNav:true,exitConfirm:true,js:true,dom:true,file:false,content:false,uFile:false,fileUrl:false,zoom:false,wide:true,overview:true,geo:false,cache:'default',mixed:'never'},
+feat:{notify:false,reminders:false,vibrate:false,toast:false,share:false,files:false,tts:false,info:false,biometric:false,secure:false,fullscreen:false,anim:'fade'},ads:{on:false},out:{format:'apk',ksName:'',ksAlias:'',ksPath:''}});
+function merge(b,i){if(!i||typeof i!=='object')return b;for(const k in b){if(!(k in i))continue;const x=b[k],y=i[k];
+if(Array.isArray(x)){if(Array.isArray(y))b[k]=y.filter(s=>typeof s==='string').slice(0,50)}
+else if(x&&typeof x==='object')merge(x,y);
+else if(typeof x==='string'&&typeof y==='number')b[k]=String(y);
+else if(typeof x===typeof y&&(typeof y!=='string'||y.length<3e6))b[k]=y}return b}
+/* ===== state + persistence ===== */
+const KEY='hab.projects.v1';let DB={cur:null,list:{}},P=null,S=0,draft=null,showAll=false,q='',sel=new Set(),view='home',advOpen=false,bstat='',tm;
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&d.list){for(const k in d.list)d.list[k]=merge(blank(String(d.list[k].name||'Project')),d.list[k]);DB=d}}catch(e){toast('Saved data was unreadable; starting fresh',1)}}
+function save(){try{if(P){P.updated=Date.now();DB.list[P.id]=P}DB.cur=P?P.id:null;localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){toast('Storage full or blocked. Export a JSON backup.',1)}}
+/* ===== validation ===== */
+const INT=(a,b)=>v=>/^\d+$/.test(String(v))&&+v>=a&&+v<=b?'':`Enter a whole number from ${a} to ${b}`;
+const HEXV=v=>HEXR.test(v)?'':'Use the format #RRGGBB';
+const F=(k,l,t,o={})=>({k,l,t,...o});
+const OR=[['auto','Automatic'],['portrait','Portrait'],['landscape','Landscape']],TN=[['auto','Automatic'],['light','Light icons'],['dark','Dark icons']],PRE=['#22d3ee','#3b82f6','#8b5cf6','#22c55e','#f59e0b','#ef4444'];
+const PERMS=[['INTERNET','Internet','Load remote pages and resources'],['ACCESS_NETWORK_STATE','Network state','Detect online/offline'],['READ_EXTERNAL_STORAGE','Storage and file access','Read files (WRITE_EXTERNAL_STORAGE on old Android)'],['READ_MEDIA_IMAGES','Images','Also READ_MEDIA_VIDEO and READ_MEDIA_AUDIO are added with media'],['READ_MEDIA_VIDEO','Videos',''],['READ_MEDIA_AUDIO','Audio',''],['CAMERA','Camera','Photo and video capture'],['RECORD_AUDIO','Microphone','Audio recording'],['ACCESS_FINE_LOCATION','Precise location','GPS-level position'],['ACCESS_COARSE_LOCATION','Approximate location','City-level position'],['POST_NOTIFICATIONS','Notifications','Show notifications (Android 13+)'],['SCHEDULE_EXACT_ALARM','Exact alarms','Schedule exact-time alarms'],['ACTIVITY_RECOGNITION','Activity recognition','Steps and movement'],['VIBRATE','Vibration','Haptic feedback'],['READ_PHONE_STATE','Phone state','Read phone status']];
+const WB=(k,l,h,o={})=>F('wv.'+k,l,'bool',{h,...o});
+const STEPS=[
+{t:'App information',f:[F('app.name','Application name','text',{v:v=>v.trim().length>=2&&v.length<=50?'':'Enter 2 to 50 characters'}),
+F('app.pkg','Package name','text',{h:'Example: com.example.myapp',v:v=>/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(v)?'':'Use lowercase segments separated by dots, like com.example.app'}),
+F('app.vc','Version code','num',{v:INT(1,2100000000)}),F('app.vn','Version name','text',{v:v=>v.trim()?'':'Enter a version name'}),
+F('app.auto','Auto-increment version code','bool',{h:'Adds 1 each time you export this project'}),
+F('app.min','Minimum SDK','num',{v:INT(1,40)}),F('app.target','Target SDK','num',{v:(v,p)=>INT(1,40)(v)||(+v>=+p.app.min?'':'Must be at least the minimum SDK')}),
+F('app.max','Maximum SDK (optional)','num',{v:(v,p)=>v===''?'':INT(1,40)(v)||(+v>=+p.app.target?'':'Must be at least the target SDK')}),
+F('app.scheme','Custom URL scheme (optional)','text',{h:'Example: myapp',v:v=>v===''||/^[a-z][a-z0-9+.-]*$/.test(v)?'':'Use letters, digits, + . - only'})]},
+{t:'Content source',f:[F('src.type','Source type','sel',{o:[['file','Local HTML file'],['template','Built-in template'],['blank','Blank project']]})],
+x:()=>{const t=P.src.type,v=vh(draft);return (t==='file'?`<label for="hf">HTML file</label><input type="file" id="hf" accept=".html,.htm,text/html"><small>Selected: ${esc(P.src.file||'none')}</small>`:'')+(t==='template'?`<label for="tp">Template</label><select id="tp">${Object.entries(TPL).map(([k,x])=>`<option value="${k}">${x.n}</option>`).join('')}</select><div class="acts"><button class="g" data-a="tpl">Load into editor</button></div>`:'')+`<label for="ed">HTML editor</label><textarea id="ed" spellcheck="false">${esc(draft)}</textarea><small>Ctrl+Z / Ctrl+Y undo and redo in the editor. Nothing is kept until you press Save.</small><div class="acts"><button data-a="sv">Save</button><button class="g" data-a="cn">Cancel edits</button></div><div id="hv">${hv(v)}</div><label>Preview (sandboxed, no access to this app)</label><iframe id="fr" sandbox="allow-scripts" title="HTML preview"></iframe>`}},
+{t:'Display settings',pv:1,f:[F('disp.orient','Orientation','sel',{o:OR}),F('disp.status','Show status bar','bool'),F('disp.action','Show action bar','bool'),F('disp.keepOn','Keep screen on','bool'),
+F('disp.cutout','Camera cutout handling','sel',{o:[['default','Default'],['shortEdges','Short edges'],['never','Never']]}),F('disp.desktop','Desktop mode','bool',{h:'Request the desktop version of sites'}),
+F('disp.wm','Watermark','bool',{dis:1,h:'Disabled in this edition'}),
+F('disp.primary','Primary color','color',{pre:1,v:HEXV,adv:1}),F('disp.loadBg','Page-loading background','color',{v:HEXV,adv:1}),F('disp.statusColor','Status bar color','color',{v:HEXV,adv:1}),F('disp.navColor','Navigation bar color','color',{v:HEXV,adv:1}),
+F('disp.transp','Transparent system bars','bool',{adv:1}),F('disp.tint','System icon tint','sel',{o:TN,adv:1})]},
+{t:'Permissions',note:'Selecting a permission only configures the future Android project. A web page cannot grant native Android permissions.',f:[],
+x:()=>PERMS.map(p=>`<label class="row"><span><b>${p[1]}</b><small>${p[2]}<br>android.permission.${p[0]}</small></span><input type="checkbox" data-perm="${p[0]}" ${P.perms.includes(p[0])?'checked':''}></label>`).join('')},
+{t:'App icon',f:[F('icon','App icon','img',{h:'Square PNG, JPEG, WebP or GIF under 1.5 MB. 512x512 recommended.'})]},
+{t:'Splash screen and branding',pv:1,f:[F('splash.on','Enable splash screen','bool'),F('splash.bg','Background color','color',{v:HEXV}),F('splash.style','Loader style','sel',{o:[['ring','Spinning ring'],['dots','Pulsing dots'],['bar','Progress bar']]}),
+F('splash.loader','Loader color','color',{v:HEXV}),F('splash.ring','Ring color','color',{v:HEXV}),F('splash.img','Custom image (falls back to app icon)','img'),
+F('splash.iconSize','Icon size (dp)','num',{v:INT(32,256)}),F('splash.radius','Corner radius (dp)','num',{v:INT(0,128)}),F('splash.loaderSize','Loader size (dp)','num',{v:INT(16,128)}),F('splash.gap','Spacing (dp)','num',{v:INT(0,128)}),
+F('splash.dur','Display duration (ms)','num',{v:INT(0,10000)}),F('splash.thick','Loader thickness (dp)','num',{v:INT(1,16)}),F('splash.fade','Fade transition (ms)','num',{v:INT(0,3000)})]},
+{t:'WebView settings',note:'These configure the future Android WebView. A browser tab ignores them.',f:[WB('refresh','Pull to refresh'),WB('noNet','No-internet dialog'),WB('indicator','Loading indicator'),WB('backNav','Back button navigates history'),WB('exitConfirm','Exit confirmation dialog'),
+WB('js','JavaScript','Needed by most pages',{adv:1}),WB('dom','DOM storage','localStorage for pages',{adv:1}),WB('file','File access','Risky: keep off unless needed',{adv:1}),WB('content','Content access','Allow content:// URLs',{adv:1}),WB('uFile','Universal file access','Risky: keep off',{adv:1}),WB('fileUrl','File-URL access','Risky: keep off',{adv:1}),
+WB('zoom','Built-in zoom controls','',{adv:1}),WB('wide','Wide viewport','',{adv:1}),WB('overview','Overview loading mode','',{adv:1}),WB('geo','Geolocation','Also needs a location permission',{adv:1}),
+F('wv.cache','Cache mode','sel',{adv:1,o:[['default','Default'],['no-cache','No cache'],['cache-else-network','Cache else network'],['cache-only','Cache only']]}),F('wv.mixed','Mixed-content mode','sel',{adv:1,o:[['never','Never allow'],['compat','Compatibility'],['always','Always allow']]})]},
+{t:'Native features',note:'Your HTML calls these through the Android object. Each one stays off until you switch it on. Microphone and location are not offered.',f:[F('feat.notify','Notifications','bool',{h:'Android.notify(title, text)'}),F('feat.reminders','Reminders and alarms','bool',{h:'Android.schedule(id, timeMs, title, text). Survives restart'}),F('feat.vibrate','Vibration','bool',{h:'Android.vibrate(200)'}),F('feat.toast','Toast messages','bool',{h:'Android.toast(text)'}),F('feat.share','Share and copy','bool',{h:'Android.share(text) and Android.copy(text)'}),F('feat.files','File picker and save to Downloads','bool',{h:'File inputs work. Android.saveFile(name, mime, text)'}),F('feat.tts','Text to speech','bool',{h:'Android.speak(text)'}),F('feat.info','Network and version info','bool',{h:'Android.isOnline() and Android.appVersion()'}),F('feat.biometric','Fingerprint or PIN lock','bool',{h:'Asks to unlock when the app opens'}),F('feat.secure','Block screenshots','bool',{h:''}),F('feat.fullscreen','Fullscreen immersive mode','bool',{h:''}),F('feat.anim','Screen enter and exit animation','sel',{o:[['fade','Fade'],['slide','Slide'],['zoom','Zoom'],['none','None']]})]},
+{t:'Advertising',note:'Optional and off by default. No ads are shown and no ad SDK, account or credentials are needed.',f:[F('ads.on','Enable AdMob configuration','bool',{h:'Records the choice only'})]},
+{t:'Project summary',sm:1,f:[],x:()=>summary()},
+{t:'Output settings',f:[F('out.format','Output format','sel',{o:[['apk','APK'],['aab','AAB (app bundle)']]}),F('out.ksName','Keystore name (optional)','text',{h:'Label only. Passwords and keys are never stored here.'}),
+F('out.ksAlias','Key alias','text',{v:(v,p)=>p.out.ksName&&!v.trim()?'Enter an alias for the named keystore':''}),F('out.ksPath','Keystore location (optional)','text',{h:'Where the build machine will find it'})],
+x:()=>`<div class="acts"><button data-a="val">Validate configuration</button><button data-a="cfg">Download config.json</button></div><div class="card" id="bs">${bs()}</div><small>Upload config.json to your GitHub repo (replace the old one), then run the Build APK workflow. config.json already contains your HTML and images. GitHub builds a debug-signed APK. AAB and release signing are not included yet.</small>`}];
+const SUMI=STEPS.findIndex(s=>s.sm);
+function errs(i,p=P){const o=[];STEPS[i].f.forEach(f=>{if(f.v){const m=f.v(get(p,f.k),p);if(m)o.push([f.k,m])}});
+if(i===1){const e=vh(p.src.html).err;if(e)o.push(['src.html',e])}
+if(STEPS[i].sm)for(let j=0;j<i;j++)errs(j,p).forEach(x=>o.push([j,x[1]]));return o}
+function vh(h){const w=[];let err='';if(!h.trim())err='Content is empty';else if(h.length>2e6)err='Content is over 2 MB';else if(!/<[a-z!][^>]*>/i.test(h))err='No HTML tags found';
+if(!err){const d=new DOMParser().parseFromString(h,'text/html');if(!d.querySelector('title'))w.push('No <title> element');if(!d.querySelector('meta[name=viewport]'))w.push('No viewport meta tag; layout may not fit phones');if(d.querySelector('script[src^=http],link[href^=http],img[src^=http]'))w.push('Uses remote resources; the app will need internet');if(!/<html/i.test(h))w.push('No <html> element')}return{err,w}}
+const hv=v=>v.err?`<div class="err">${esc(v.err)}</div>`:v.w.length?`<ul class="wr">${v.w.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<small>No HTML issues found</small>';
+const bs=()=>`<b>Build status</b><div class="bar" style="margin:8px 0"><i style="width:0"></i></div><small>${esc(bstat||'Idle. This page does not build APKs. GitHub builds one after you upload config.json.')}</small>`;
+/* ===== rendering ===== */
+function fld(f){const v=get(P,f.k),e=`<div class="err" data-e="${f.k}" role="alert"></div>`;
+if(f.t==='bool')return `<label class="row"><span><b>${f.l}</b>${f.h?`<small>${f.h}</small>`:''}</span><input type="checkbox" data-k="${f.k}" ${v?'checked':''} ${f.dis?'disabled':''}></label>`;
+let c;if(f.t==='sel')c=`<select id="${f.k}" data-k="${f.k}">${f.o.map(([a,b])=>`<option value="${a}" ${a===v?'selected':''}>${b}</option>`).join('')}</select>`;
+else if(f.t==='color')c=`<div class="cr"><input type="color" data-k="${f.k}" value="${C(v)}" aria-label="${f.l} picker"><input type="text" id="${f.k}" data-k="${f.k}" value="${esc(v)}" maxlength="7"></div>`+(f.pre?`<div class="pre">${PRE.map(x=>`<button data-a="pre" data-k="${f.k}" data-c="${x}" style="background:${x}" aria-label="Preset ${x}"></button>`).join('')}</div>`:'');
+else if(f.t==='img'){c=`<div class="imgb">${v.data?`<img class="th" src="${esc(v.data)}" alt="Selected image preview">`:`<div class="th def">${esc((P.app.name||'A')[0].toUpperCase())}</div>`}<div><input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-img="${f.k}" aria-label="${f.l}"><small>${v.name?esc(v.name):'Default icon in use'}</small>${v.data?`<button class="g" data-a="rm" data-k="${f.k}">Remove</button>`:''}</div></div>`}
+else c=`<input type="text" id="${f.k}" data-k="${f.k}" value="${esc(v)}" ${f.t==='num'?'inputmode="numeric"':''} autocomplete="off">`;
+return `<label for="${f.k}">${f.l}</label>${c}${f.h?`<small>${f.h}</small>`:''}${e}`}
+function home(){$('#hd').innerHTML='<h1>Android App Builder</h1><small>HTML to Android project configurator. Phase 1 runs in the browser only.</small>'+themeBar();
+$('#app').innerHTML=`<div class="card"><input type="text" id="q" placeholder="Search projects" aria-label="Search projects" value="${esc(q)}"><div class="acts"><button data-a="new">New project</button><button class="g" data-a="imp">Import JSON</button><button class="g" data-a="expsel" ${sel.size?'':'disabled'}>Export selected (${sel.size})</button></div></div><div id="list">${lst()}</div><div class="card"><small>Exports are project source and configuration JSON, not APK or AAB files. This prototype cannot compile or sign Android packages. ZIP export, IndexedDB asset storage and keystore import are planned for Phase 2.</small></div>`;$('#nav').innerHTML=''}
+function lst(){const L=Object.values(DB.list).filter(p=>p.name.toLowerCase().includes(q.toLowerCase())).sort((a,b)=>b.updated-a.updated);
+return L.length?L.map(p=>`<div class="card"><label class="row"><span><b>${esc(p.name)}</b><small>${esc(p.app.pkg||'No package yet')} - step ${p.step+1} of ${STEPS.length} - ${esc(new Date(p.updated).toLocaleString())}</small></span><input type="checkbox" data-sel="${p.id}" ${sel.has(p.id)?'checked':''} aria-label="Select ${esc(p.name)}"></label><div class="acts"><button data-a="open" data-id="${p.id}">${p.step>0?'Resume':'Open'}</button><button class="g" data-a="ren" data-id="${p.id}">Rename</button><button class="g" data-a="dup" data-id="${p.id}">Duplicate</button><button class="g" data-a="exp" data-id="${p.id}">Export</button><button class="d" data-a="del" data-id="${p.id}">Delete</button></div></div>`).join(''):`<div class="card">${q?'No projects match your search.':'No projects yet. Create one to start the ten-step wizard.'}</div>`}
+function wiz(){const st=STEPS[S];$('#hd').innerHTML=`<div class="top"><button class="g" data-a="home" aria-label="Back to projects">Projects</button><div><h1>${esc(P.name)}</h1><small>Step ${S+1} of ${STEPS.length}: ${st.t}</small></div><button class="g cyc" data-a="cyc" aria-label="Change theme">${({light:'Light',dark:'Dark',system:'Auto'})[THEME]}</button></div><div class="bar" role="progressbar" aria-valuenow="${S+1}" aria-valuemin="1" aria-valuemax="${STEPS.length}"><i style="width:${(S+1)*100/STEPS.length}%"></i></div>`;
+const a=st.f.filter(f=>!f.adv),b=st.f.filter(f=>f.adv);
+$('#app').innerHTML=`<div class="card"><h2>${st.t}</h2>${st.note?`<small>${st.note}</small>`:''}${a.map(fld).join('')}${b.length?`<details id="adv" ${advOpen||showAll?'open':''}><summary>Advanced settings</summary>${b.map(fld).join('')}</details>`:''}${st.x?st.x():''}</div>${st.pv?'<div class="card" id="pv"></div>':''}`;
+$('#nav').innerHTML=`<button class="g" data-a="prev" ${S?'':'disabled'}>Back</button><button data-a="next">${S===STEPS.length-1?'Done':'Next'}</button>`;
+pv();if(S===1)$('#fr').srcdoc=draft;if(showAll)errs(S).forEach(([k,m])=>{const e=document.querySelector(`[data-e="${k}"]`);if(e)e.textContent=m})}
+function render(){const y=scrollY;view==='home'?home():wiz();scrollTo(0,y)}
+const lum=c=>{const n=parseInt(C(c).slice(1),16);return(.299*(n>>16)+.587*(n>>8&255)+.114*(n&255))/255},ic=c=>P.disp.tint==='light'?'#fff':P.disp.tint==='dark'?'#222':lum(c)>.5?'#222':'#fff';
+function pv(){const el=$('#pv');if(!el)return;const d=P.disp,s=P.splash;
+if(S===2){const sb=d.transp?'transparent':C(d.statusColor),nb=d.transp?'transparent':C(d.navColor);
+el.innerHTML=`<h2>Preview</h2><div class="phone${d.orient==='landscape'?' land':''}" style="background:${C(d.loadBg)}">${d.status?`<div class="sb" style="background:${sb};color:${ic(d.statusColor)}"><span>9:41</span><span>signal</span></div>`:''}${d.action?`<div class="ab" style="background:${C(d.primary)};color:${ic(d.primary)}">${esc(P.app.name||'App')}</div>`:''}<div class="bd">Page loading</div><div class="nb" style="background:${nb}"></div></div><small>Orientation: ${esc(d.orient)}. Keep screen on: ${d.keepOn?'yes':'no'}.</small>`}
+else if(S===5){const ld=C(s.loader),rg=C(s.ring),th=Math.max(1,+s.thick||1),ls=(+s.loaderSize||40)/2,is=(+s.iconSize||96)/2,r=(+s.radius||0)/2,im=s.img.data||P.icon.data;
+const logo=im?`<img alt="" src="${esc(im)}" style="width:${is}px;height:${is}px;border-radius:${r}px;object-fit:cover">`:`<div class="def" style="width:${is}px;height:${is}px;border-radius:${r}px">${esc((P.app.name||'A')[0].toUpperCase())}</div>`;
+const l=s.style==='ring'?`<div class="ring" style="width:${ls}px;height:${ls}px;border-width:${th/2}px;border-color:${rg};border-top-color:${ld}"></div>`:s.style==='dots'?`<div class="dots" style="color:${ld}"><i></i><i></i><i></i></div>`:`<div style="width:${ls*2}px;height:${th}px;background:${rg};border-radius:9px;overflow:hidden"><div class="ind" style="background:${ld}"></div></div>`;
+el.innerHTML=`<h2>Preview</h2><div class="phone" style="background:${C(s.bg)};align-items:center;justify-content:center">${s.on?logo+`<div style="height:${(+s.gap||0)/2}px"></div>`+l:'<small>Splash disabled</small>'}</div><small>Shown for ${esc(s.dur)} ms, fading over ${esc(s.fade)} ms.</small>`}}
+function summary(){const a=P.app,d=P.disp,s=P.splash,w=P.wv,yn=v=>v?'Yes':'No',on=Object.entries(w).filter(([k,v])=>v===true).length;
+const sec=[[0,'App',[['Name',a.name],['Package',a.pkg],['Version',`${a.vn} (code ${a.vc})`],['SDK',`min ${a.min}, target ${a.target}${a.max?', max '+a.max:''}`],['URL scheme',a.scheme||'None']]],
+[1,'Content',[['Source',{file:'Local file',template:'Template',blank:'Blank'}[P.src.type]],['File',P.src.file||'None'],['Size',P.src.html.length+' characters']]],
+[2,'Display',[['Orientation',d.orient],['Status / action bar',`${yn(d.status)} / ${yn(d.action)}`],['Keep screen on',yn(d.keepOn)],['Cutout',d.cutout],['Desktop mode',yn(d.desktop)],['Watermark','Off'],['Colors',`${d.primary}, ${d.loadBg}, ${d.statusColor}, ${d.navColor}`],['System icons',d.tint]]],
+[3,'Permissions',[['Selected',P.perms.length?P.perms.map(x=>(PERMS.find(p=>p[0]===x)||[0,x])[1]).join(', '):'None']]],
+[4,'Icon',[['Image',P.icon.name||'Default icon']]],
+[5,'Splash',[['Enabled',yn(s.on)],['Style',s.style],['Timing',`${s.dur} ms, fade ${s.fade} ms`],['Sizes',`icon ${s.iconSize}, loader ${s.loaderSize}, radius ${s.radius}`]]],
+[6,'WebView',[['Switches on',on+' enabled'],['Cache / mixed',`${w.cache} / ${w.mixed}`],['JavaScript',yn(w.js)]]],
+[7,'Features',[['Switched on',Object.entries(P.feat).filter(([k,v])=>v===true).map(([k])=>k).join(', ')||'None'],['Animation',P.feat.anim]]],[8,'Advertising',[['Status',P.ads.on?'Enabled (config only, no ads shown)':'Disabled']]],
+[10,'Output',[['Format',P.out.format.toUpperCase()],['Keystore',P.out.ksName?`${P.out.ksName} (alias ${P.out.ksAlias})`:'None']]]];
+const e=errs(SUMI);
+return sec.map(([i,t,r])=>`<div class="card sum"><h3>${t}<button class="g" data-a="edit" data-step="${i}">Edit</button></h3><dl>${r.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl></div>`).join('')+(e.length?`<div class="card"><b class="err">Fix before finishing</b><ul class="wr">${e.map(([i,m])=>`<li>Step ${i+1}: ${esc(m)}</li>`).join('')}</ul></div>`:'<div class="card"><small>All required settings are valid.</small></div>')}
+/* ===== actions ===== */
+function upd(k,v){set(P,k,v);save();const f=STEPS[S].f.find(x=>x.k===k);
+document.querySelectorAll(`[data-k="${k}"]`).forEach(x=>{if(x.tagName==='INPUT'&&x.type!=='checkbox'&&x.value!==v&&(x.type!=='color'||HEXR.test(v)))x.value=v});
+const el=document.querySelector(`[data-e="${k}"]`);if(el&&f?.v)el.textContent=f.v(v,P)||'';pv()}
+function flush(){if(S===1&&draft!==null&&draft!==P.src.html&&confirm('Save your HTML edits? Cancel discards them.')){P.src.html=draft;save()}}
+function enter(){draft=S===1?P.src.html:null}
+function go(n){flush();if(n>S){const e=errs(S);if(e.length){showAll=true;enter();if(S===1)draft=P.src.html;render();return toast('Fix the highlighted items first',1)}}
+showAll=false;S=n;P.step=n;enter();save();scrollTo(0,0);render();const a=$('#app');a.classList.remove('sw');void a.offsetWidth;a.classList.add('sw')}
+function exportP(ids){const ps=ids.map(i=>DB.list[i]).filter(Boolean);if(!ps.length)return toast('Select projects first',1);ps.forEach(p=>{if(p.app.auto)p.app.vc=String((+p.app.vc||0)+1)});save();
+dl('app-builder-projects.json',{format:'hab-project-1',note:'Project source and configuration. Not an APK or AAB.',projects:ps});toast(ps.length+' project(s) exported');pop()}
+function dl(n,o){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,2)],{type:'application/json'}));a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3)}
+async function doImport(f){try{if(f.size>2e7)throw Error('File is too large');const d=JSON.parse(await f.text());if(d.format!=='hab-project-1'||!Array.isArray(d.projects))throw Error('Not a project export');let n=0;
+for(const x of d.projects.slice(0,100)){if(!x||typeof x.name!=='string')continue;const p=merge(blank(x.name.slice(0,60)),x);p.id=uid();p.step=Math.max(0,Math.min(STEPS.length-1,+p.step||0));p.disp.wm=false;
+if(!IMGR.test(p.icon.data))p.icon={name:'',data:''};if(!IMGR.test(p.splash.img.data))p.splash.img={name:'',data:''};DB.list[p.id]=p;n++}
+if(!n)throw Error('No valid projects found');save();toast(n+' project(s) imported');render()}catch(e){toast('Import failed: '+e.message,1)}}
+function pickImg(t){const f=t.files[0],k=t.dataset.img;if(!f)return;if(!/^image\/(png|jpeg|webp|gif)$/.test(f.type))return toast('Use PNG, JPEG, WebP or GIF',1);if(f.size>1.5e6)return toast('Image must be under 1.5 MB',1);
+const r=new FileReader();r.onload=()=>{if(!IMGR.test(r.result))return toast('Unsupported image data',1);const im=new Image();im.onload=()=>{set(P,k,{name:f.name.slice(0,80),data:r.result});save();render();if(im.width!==im.height)toast(`Image is ${im.width}x${im.height}. Square is recommended.`)};im.onerror=()=>toast('That file is not a valid image',1);im.src=r.result};r.onerror=()=>toast('Could not read the file',1);r.readAsDataURL(f)}
+function pickHtml(t){const f=t.files[0];if(!f)return;if(!/\.html?$/i.test(f.name)&&f.type!=='text/html')return toast('Choose an .html or .htm file',1);if(f.size>2e6)return toast('HTML file must be under 2 MB',1);
+const r=new FileReader();r.onload=()=>{draft=String(r.result);P.src.file=f.name.slice(0,80);P.src.type='file';save();render();toast('Loaded. Press Save to keep it.')};r.onerror=()=>toast('Could not read the file',1);r.readAsText(f)}
+const A={
+new(){const n=prompt('Project name');if(n&&n.trim()){P=blank(n.trim().slice(0,60));P.app.name=P.name;S=0;view='wiz';save();enter();render()}},
+imp(){$('#imp').click()},expsel(){exportP([...sel])},exp(b){exportP([b.dataset.id])},
+open(b){P=DB.list[b.dataset.id];S=Math.min(P.step,STEPS.length-1);view='wiz';showAll=false;enter();render()},
+ren(b){const p=DB.list[b.dataset.id],n=prompt('New name',p.name);if(n&&n.trim()){p.name=n.trim().slice(0,60);save();render()}},
+dup(b){const c=JSON.parse(JSON.stringify(DB.list[b.dataset.id]));c.id=uid();c.name+=' (copy)';c.created=c.updated=Date.now();DB.list[c.id]=c;save();render()},
+del(b){const p=DB.list[b.dataset.id];if(confirm(`Delete "${p.name}"? This cannot be undone.`)){delete DB.list[p.id];sel.delete(p.id);save();render()}},
+home(){flush();save();P=null;view='home';render()},prev(){go(S-1)},next(){S===STEPS.length-1?A.home():go(S+1)},edit(b){go(+b.dataset.step)},
+pre(b){upd(b.dataset.k,b.dataset.c)},tpl(){const k=$('#tp').value;draft=TPL[k].h;P.src.type='template';P.src.file=TPL[k].n;render()},
+sv(){const v=vh(draft);if(v.err)return toast(v.err,1);P.src.html=draft;save();render();toast('HTML saved');pop()},cn(){draft=P.src.html;render()},
+rm(b){set(P,b.dataset.k,{name:'',data:''});save();render()},
+val(){const e=errs(SUMI);bstat=e.length?'Not ready: '+e.map(([i,m])=>`step ${i+1} - ${m}`).join('; '):'Configuration is valid. Download config.json and upload it to GitHub. No build was run here.';$('#bs').innerHTML=bs();if(!e.length)pop()},
+cfg(){const e=errs(SUMI);if(e.length)return toast('Fix configuration errors first',1);dl('config.json',{format:'hab-build-config-1',buildPerformed:false,config:P});toast('Build config exported');pop()}};
+document.addEventListener('click',e=>{if(e.target.closest('button'))buzz();const b=e.target.closest('[data-a]');if(b)A[b.dataset.a]?.(b)});
+document.addEventListener('input',e=>{const t=e.target;
+if(t.id==='q'){q=t.value;$('#list').innerHTML=lst();return}
+if(t.id==='ed'){draft=t.value;clearTimeout(tm);tm=setTimeout(()=>{$('#hv').innerHTML=hv(vh(draft));$('#fr').srcdoc=draft},300);return}
+if(t.dataset.k&&t.type!=='checkbox'&&t.tagName!=='SELECT')upd(t.dataset.k,t.value)});
+document.addEventListener('change',e=>{const t=e.target,k=t.dataset.k;
+if(t.dataset.sel){t.checked?sel.add(t.dataset.sel):sel.delete(t.dataset.sel);return render()}
+if(t.dataset.perm){const s=new Set(P.perms);t.checked?s.add(t.dataset.perm):s.delete(t.dataset.perm);P.perms=[...s];return save()}
+if(t.dataset.img)return pickImg(t);if(t.id==='hf')return pickHtml(t);
+if(k&&(t.type==='checkbox'||t.tagName==='SELECT')){upd(k,t.type==='checkbox'?t.checked:t.value);if(k==='src.type'&&t.value==='blank')draft=TPL.blank.h;render()}});
+document.addEventListener('toggle',e=>{if(e.target.id==='adv')advOpen=e.target.open},true);
+$('#imp').onchange=e=>{if(e.target.files[0])doImport(e.target.files[0]);e.target.value=''};
+/* ===== theme, haptics, confetti ===== */
+let THEME='light';try{THEME=localStorage.getItem('hab.theme')||'light'}catch(e){}
+const mq=matchMedia('(prefers-color-scheme:dark)');
+function applyTheme(){const e=THEME==='system'?(mq.matches?'dark':'light'):THEME;document.documentElement.dataset.theme=e;const m=document.querySelector('meta[name=theme-color]');if(m)m.content=e==='dark'?'#1f232b':'#e6e9ef'}
+mq.addEventListener('change',()=>{if(THEME==='system')applyTheme()});
+function setTheme(v){THEME=v;try{localStorage.setItem('hab.theme',v)}catch(e){}applyTheme();render()}
+A.theme=b=>setTheme(b.dataset.v);A.cyc=()=>setTheme({light:'dark',dark:'system',system:'light'}[THEME]);
+const themeBar=()=>`<div class="seg" role="group" aria-label="Theme">${[['light','Light'],['dark','Dark'],['system','System']].map(([v,l])=>`<button class="${THEME===v?'on':''}" data-a="theme" data-v="${v}" aria-pressed="${THEME===v}">${l}</button>`).join('')}</div>`;
+const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
+document.addEventListener('change',e=>{if(e.target.type==='checkbox')buzz()});
+function pop(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;const cs=['#22d3ee','#8b5cf6','#f59e0b','#22c55e','#ef4444'];for(let i=0;i<26;i++){const d=document.createElement('i'),a=-Math.random()*Math.PI,r=90+Math.random()*130;d.className='cf';d.style.cssText=`background:${cs[i%5]};--x:${Math.cos(a)*r}px;--y:${Math.sin(a)*r}px;--r:${Math.random()*540}deg`;document.body.appendChild(d);setTimeout(()=>d.remove(),1000)}}
+applyTheme();load();render();
+</script></body></html>
