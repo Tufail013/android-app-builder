@@ -1,0 +1,1815 @@
+{
+ "schema": 1,
+ "version": "1.0.0",
+ "categories": {
+  "core": "Core WebView",
+  "alerts": "Notifications and reminders",
+  "files": "Files and sharing",
+  "media": "Media and speech",
+  "location": "Location and maps",
+  "hardware": "Device hardware",
+  "security": "Security and privacy",
+  "system": "System and display",
+  "integration": "App integration",
+  "data": "Data and storage",
+  "accounts": "Accounts and cloud",
+  "quality": "Diagnostics and testing",
+  "build": "Build and distribution",
+  "extend": "Extensions"
+ },
+ "permissions": {
+  "ACCESS_NETWORK_STATE": {
+   "title": "Network status",
+   "kind": "normal",
+   "sensitivity": "low",
+   "why": "Lets the app check whether the phone is online.",
+   "if_granted": "The app can show an offline message.",
+   "if_denied": "Connectivity checks may be wrong.",
+   "android": ""
+  },
+  "INTERNET": {
+   "title": "Internet access",
+   "kind": "normal",
+   "sensitivity": "low",
+   "why": "Lets pages load online content and call web services.",
+   "if_granted": "Online content and APIs work.",
+   "if_denied": "The app works offline only.",
+   "android": ""
+  },
+  "POST_NOTIFICATIONS": {
+   "title": "Show notifications",
+   "kind": "runtime",
+   "sensitivity": "low",
+   "why": "Lets the app show alerts.",
+   "if_granted": "Notifications appear.",
+   "if_denied": "No alerts are shown; the rest of the app works.",
+   "android": "Runtime permission from Android 13 (API 33); older versions grant it automatically."
+  },
+  "SCHEDULE_EXACT_ALARM": {
+   "title": "Exact alarms",
+   "kind": "special",
+   "sensitivity": "medium",
+   "why": "Lets reminders fire at the exact minute.",
+   "if_granted": "Reminders fire on time.",
+   "if_denied": "Reminders still fire but may be a few minutes late.",
+   "android": "Android 12+ restricts it; Android 13+ does not grant it by default. Google Play limits its use to apps whose main job is alarms or calendars."
+  },
+  "RECEIVE_BOOT_COMPLETED": {
+   "title": "Run after restart",
+   "kind": "normal",
+   "sensitivity": "low",
+   "why": "Lets the app restore reminders after the phone restarts.",
+   "if_granted": "Reminders survive a restart.",
+   "if_denied": "Reminders are lost when the phone restarts.",
+   "android": ""
+  },
+  "VIBRATE": {
+   "title": "Vibration",
+   "kind": "normal",
+   "sensitivity": "low",
+   "why": "Lets the app vibrate the phone.",
+   "if_granted": "Vibration works.",
+   "if_denied": "No vibration.",
+   "android": ""
+  },
+  "USE_BIOMETRIC": {
+   "title": "Fingerprint or face unlock",
+   "kind": "normal",
+   "sensitivity": "low",
+   "why": "Lets the app ask for fingerprint, face or screen lock.",
+   "if_granted": "The unlock prompt works.",
+   "if_denied": "The lock cannot be shown.",
+   "android": "PIN fallback together with biometrics needs Android 11 (API 30)."
+  },
+  "CAMERA": {
+   "title": "Camera",
+   "kind": "runtime",
+   "sensitivity": "high",
+   "why": "Needed to take photos or video.",
+   "if_granted": "Camera features work.",
+   "if_denied": "Photo capture does not work; the rest of the app does.",
+   "android": ""
+  },
+  "RECORD_AUDIO": {
+   "title": "Microphone",
+   "kind": "runtime",
+   "sensitivity": "high",
+   "why": "Needed to record audio or speech.",
+   "if_granted": "Recording works.",
+   "if_denied": "Recording does not work.",
+   "android": ""
+  },
+  "ACCESS_FINE_LOCATION": {
+   "title": "Precise location",
+   "kind": "runtime",
+   "sensitivity": "high",
+   "why": "Needed for an exact position (GPS).",
+   "if_granted": "Exact location works.",
+   "if_denied": "Only approximate location, or none.",
+   "android": ""
+  },
+  "ACCESS_COARSE_LOCATION": {
+   "title": "Approximate location",
+   "kind": "runtime",
+   "sensitivity": "high",
+   "why": "Needed for a city-level position.",
+   "if_granted": "Approximate location works.",
+   "if_denied": "Location does not work.",
+   "android": ""
+  },
+  "ACCESS_BACKGROUND_LOCATION": {
+   "title": "Location in the background",
+   "kind": "runtime",
+   "sensitivity": "high",
+   "why": "Needed to read location while the app is closed.",
+   "if_granted": "Background location works.",
+   "if_denied": "Location only while the app is open.",
+   "android": "Separate request from Android 10; Google Play requires a declaration."
+  },
+  "BLUETOOTH_SCAN": {
+   "title": "Find Bluetooth devices",
+   "kind": "runtime",
+   "sensitivity": "medium",
+   "why": "Needed to discover nearby Bluetooth devices.",
+   "if_granted": "Scanning works.",
+   "if_denied": "Cannot find devices.",
+   "android": "Runtime permission from Android 12 (API 31)."
+  },
+  "BLUETOOTH_CONNECT": {
+   "title": "Connect to Bluetooth devices",
+   "kind": "runtime",
+   "sensitivity": "medium",
+   "why": "Needed to connect to paired devices.",
+   "if_granted": "Connecting works.",
+   "if_denied": "Cannot connect.",
+   "android": "Runtime permission from Android 12 (API 31)."
+  },
+  "NFC": {
+   "title": "NFC",
+   "kind": "normal",
+   "sensitivity": "low",
+   "why": "Needed to read NFC tags.",
+   "if_granted": "NFC reading works.",
+   "if_denied": "NFC features do not work.",
+   "android": ""
+  },
+  "ACTIVITY_RECOGNITION": {
+   "title": "Physical activity",
+   "kind": "runtime",
+   "sensitivity": "medium",
+   "why": "Needed for step counting and activity detection.",
+   "if_granted": "Step and activity data is available.",
+   "if_denied": "Those sensors are unavailable.",
+   "android": "Runtime permission from Android 10 (API 29)."
+  },
+  "FOREGROUND_SERVICE": {
+   "title": "Foreground service",
+   "kind": "normal",
+   "sensitivity": "low",
+   "why": "Lets long visible tasks keep running.",
+   "if_granted": "Long tasks keep running with a notification.",
+   "if_denied": "Long tasks may be stopped.",
+   "android": "Android 14 also needs a service type."
+  },
+  "READ_EXTERNAL_STORAGE": {
+   "title": "Read shared storage",
+   "kind": "runtime",
+   "sensitivity": "medium",
+   "why": "Old way to read files (Android 12 and older).",
+   "if_granted": "Files can be read directly.",
+   "if_denied": "Use the file picker instead.",
+   "android": "Replaced by media permissions on Android 13."
+  },
+  "READ_MEDIA_IMAGES": {
+   "title": "Read photos",
+   "kind": "runtime",
+   "sensitivity": "medium",
+   "why": "Needed to read photos directly.",
+   "if_granted": "Photos can be read.",
+   "if_denied": "Use the photo picker instead.",
+   "android": "Android 13 (API 33) and newer."
+  },
+  "READ_MEDIA_VIDEO": {
+   "title": "Read videos",
+   "kind": "runtime",
+   "sensitivity": "medium",
+   "why": "Needed to read videos directly.",
+   "if_granted": "Videos can be read.",
+   "if_denied": "Use the photo picker instead.",
+   "android": "Android 13 (API 33) and newer."
+  },
+  "READ_MEDIA_AUDIO": {
+   "title": "Read audio files",
+   "kind": "runtime",
+   "sensitivity": "medium",
+   "why": "Needed to read audio files directly.",
+   "if_granted": "Audio can be read.",
+   "if_denied": "Use the file picker instead.",
+   "android": "Android 13 (API 33) and newer."
+  },
+  "READ_PHONE_STATE": {
+   "title": "Phone status",
+   "kind": "runtime",
+   "sensitivity": "high",
+   "why": "Reads phone status and identifiers.",
+   "if_granted": "Phone status is readable.",
+   "if_denied": "Phone status is unavailable.",
+   "android": ""
+  }
+ },
+ "unsupported_web_apis": [
+  {
+   "id": "service_workers",
+   "name": "Service workers",
+   "pattern": "serviceWorker\\.register|navigator\\.serviceWorker",
+   "why": "Service workers do not run for app-internal files.",
+   "alternative": "Use the notifications and reminders features instead."
+  },
+  {
+   "id": "webusb",
+   "name": "WebUSB",
+   "pattern": "navigator\\.usb",
+   "why": "Not available in the Android WebView.",
+   "alternative": "None yet."
+  },
+  {
+   "id": "webserial",
+   "name": "Web Serial",
+   "pattern": "navigator\\.serial",
+   "why": "Not available in the Android WebView.",
+   "alternative": "None yet."
+  },
+  {
+   "id": "payment_request",
+   "name": "Payment Request API",
+   "pattern": "PaymentRequest\\s*\\(",
+   "why": "Not available in the Android WebView.",
+   "alternative": "Use a hosted checkout page in the browser."
+  }
+ ],
+ "features": [
+  {
+   "id": "webview_host",
+   "name": "App shell (WebView)",
+   "cat": "core",
+   "impl": "hybrid",
+   "status": "available",
+   "summary": "Runs your HTML inside the Android app.",
+   "perms": [
+    "ACCESS_NETWORK_STATE"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [],
+   "caution": "",
+   "meta_complete": true,
+   "core": true,
+   "does": "Wraps your page in a native screen with back handling, loading bar, pull to refresh and offline message.",
+   "apis": [
+    "WebView",
+    "WebViewClient",
+    "SwipeRefreshLayout"
+   ],
+   "benefit": "Your page runs as a normal app.",
+   "cost": "Always included.",
+   "if_off": "Not optional.",
+   "preview": {
+    "available": true,
+    "note": "The preview iframe shows the page."
+   },
+   "test": {
+    "available": false,
+    "how": ""
+   }
+  },
+  {
+   "id": "offline_assets",
+   "name": "Offline files",
+   "cat": "core",
+   "impl": "native",
+   "status": "available",
+   "summary": "Serves your files from inside the app so no internet is needed.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [],
+   "caution": "",
+   "meta_complete": true,
+   "core": true,
+   "does": "Serves files over a private https address built into the app.",
+   "apis": [
+    "WebViewAssetLoader"
+   ],
+   "benefit": "Works offline and avoids unsafe file:// access.",
+   "cost": "Always included.",
+   "if_off": "Not optional.",
+   "security": "Safer than file:// URLs.",
+   "preview": {
+    "available": true,
+    "note": "Same files as the preview."
+   },
+   "test": {
+    "available": false,
+    "how": ""
+   }
+  },
+  {
+   "id": "external_links",
+   "name": "Open outside links in the browser",
+   "cat": "core",
+   "impl": "native",
+   "status": "available",
+   "summary": "Links to other sites open in the phone browser, not inside your app.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [],
+   "caution": "",
+   "meta_complete": true,
+   "core": true,
+   "does": "Any link that is not part of your app opens in the browser.",
+   "apis": [
+    "Intent.ACTION_VIEW"
+   ],
+   "benefit": "Keeps remote websites away from the app and its native features.",
+   "cost": "Always included.",
+   "if_off": "Not optional.",
+   "security": "Prevents remote pages from using the native bridge.",
+   "preview": {
+    "available": false,
+    "note": "Not previewable in the browser."
+   },
+   "test": {
+    "available": false,
+    "how": ""
+   }
+  },
+  {
+   "id": "notifications",
+   "name": "Notifications",
+   "cat": "alerts",
+   "impl": "native",
+   "status": "available",
+   "summary": "Shows alerts from your app.",
+   "perms": [
+    "POST_NOTIFICATIONS"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "bridge",
+     "\\bAndroid\\.notify\\s*\\("
+    ],
+    [
+     "web",
+     "new\\s+Notification\\s*\\(|Notification\\.requestPermission|showNotification\\s*\\("
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "notify",
+   "does": "Adds Android.notify(title, text) and a notification channel.",
+   "apis": [
+    "NotificationManager",
+    "NotificationChannel"
+   ],
+   "bridge": {
+    "ns": "notifications",
+    "methods": [
+     "notify"
+    ],
+    "legacy": [
+     "notify"
+    ]
+   },
+   "benefit": "Alerts the user about things that matter.",
+   "cost": "Asks the user for notification permission on Android 13+.",
+   "privacy": "Notification text can show on the lock screen.",
+   "battery": "Negligible.",
+   "if_off": "Android.notify() does nothing.",
+   "preview": {
+    "available": false,
+    "note": "A real notification cannot be shown in the preview."
+   },
+   "test": {
+    "available": true,
+    "how": "Test button sends one notification on a real phone (inside the APK)."
+   },
+   "android": "Channels from Android 8; runtime permission from Android 13."
+  },
+  {
+   "id": "scheduled_reminders",
+   "name": "Scheduled reminders",
+   "cat": "alerts",
+   "impl": "native",
+   "status": "available",
+   "summary": "Shows a notification at a chosen date and time, even when the app is closed.",
+   "perms": [],
+   "deps": [
+    "notifications"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "bridge",
+     "\\bAndroid\\.(schedule|cancel)\\s*\\("
+    ],
+    [
+     "weak",
+     "[Ee]xpir|[Rr]eminder|[Rr]enew|[Dd]ue\\s?[Dd]ate",
+     "new\\s+Date|Date\\.now|setTimeout|setInterval"
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "reminders",
+   "does": "Adds Android.schedule(id, timeMs, title, text) and Android.cancel(id) using the system alarm service, not a JavaScript timer.",
+   "apis": [
+    "AlarmManager",
+    "BroadcastReceiver",
+    "PendingIntent"
+   ],
+   "manifest": {
+    "receivers": [
+     {
+      "name": ".AlarmReceiver",
+      "exported": false
+     }
+    ]
+   },
+   "bridge": {
+    "ns": "reminders",
+    "methods": [
+     "schedule",
+     "cancel"
+    ],
+    "legacy": [
+     "schedule",
+     "cancel"
+    ]
+   },
+   "benefit": "Expiry alerts and reminders still work after the app is closed.",
+   "cost": "Needs notifications; reminders are lost on restart unless boot recovery is on.",
+   "battery": "Low: the system wakes the app only when a reminder is due.",
+   "storage": "Stores a small list of pending reminders.",
+   "if_off": "Android.schedule() does nothing and timers stop when the app closes.",
+   "preview": {
+    "available": false,
+    "note": "Not previewable in the browser."
+   },
+   "test": {
+    "available": true,
+    "how": "Schedule a reminder one minute ahead, close the app, wait for the notification."
+   },
+   "android": "Doze can delay inexact alarms."
+  },
+  {
+   "id": "boot_recovery",
+   "name": "Restore reminders after restart",
+   "cat": "alerts",
+   "impl": "native",
+   "status": "available",
+   "summary": "Puts pending reminders back after the phone restarts.",
+   "perms": [
+    "RECEIVE_BOOT_COMPLETED"
+   ],
+   "deps": [
+    "scheduled_reminders"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "reminders",
+   "recommended_with": [
+    "scheduled_reminders"
+   ],
+   "does": "Re-schedules saved reminders when the phone finishes starting.",
+   "apis": [
+    "BOOT_COMPLETED receiver"
+   ],
+   "manifest": {
+    "receivers": [
+     {
+      "name": ".BootReceiver",
+      "exported": true,
+      "actions": [
+       "android.intent.action.BOOT_COMPLETED"
+      ]
+     }
+    ]
+   },
+   "benefit": "Reminders survive a restart.",
+   "cost": "One more permission and receiver.",
+   "if_off": "Reminders set before a restart are lost.",
+   "preview": {
+    "available": false,
+    "note": "Not previewable in the browser."
+   },
+   "test": {
+    "available": true,
+    "how": "Schedule a reminder, restart the phone, check that it still fires."
+   },
+   "android": "Android 15 limits some foreground-service starts at boot; this feature does not use one."
+  },
+  {
+   "id": "exact_alarms",
+   "name": "Exact-time reminders",
+   "cat": "alerts",
+   "impl": "native",
+   "status": "available",
+   "summary": "Makes reminders fire at the exact minute.",
+   "perms": [
+    "SCHEDULE_EXACT_ALARM"
+   ],
+   "deps": [
+    "scheduled_reminders"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [],
+   "caution": "Android restricts exact alarms and Google Play limits them to alarm and calendar style apps. Approximate timing is enough for most reminders.",
+   "meta_complete": true,
+   "legacy": "reminders",
+   "does": "Uses exact alarms when Android allows it, otherwise falls back to approximate timing.",
+   "apis": [
+    "AlarmManager.setExactAndAllowWhileIdle"
+   ],
+   "benefit": "Precise timing.",
+   "cost": "Special permission, Play policy review, more battery use.",
+   "battery": "Higher than approximate alarms.",
+   "if_off": "Reminders use approximate timing and may be a few minutes late.",
+   "preview": {
+    "available": false,
+    "note": "Not previewable in the browser."
+   },
+   "test": {
+    "available": true,
+    "how": "Schedule a reminder for the next minute and check the time it fires."
+   },
+   "android": "Android 12+ restricts it; Android 13+ does not grant it by default."
+  },
+  {
+   "id": "vibration",
+   "name": "Vibration",
+   "cat": "alerts",
+   "impl": "native",
+   "status": "available",
+   "summary": "Vibrates the phone.",
+   "perms": [
+    "VIBRATE"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "bridge",
+     "\\bAndroid\\.vibrate\\s*\\("
+    ],
+    [
+     "web",
+     "navigator\\.vibrate"
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "vibrate",
+   "does": "Adds Android.vibrate(ms).",
+   "apis": [
+    "Vibrator"
+   ],
+   "bridge": {
+    "ns": "haptics",
+    "methods": [
+     "vibrate"
+    ],
+    "legacy": [
+     "vibrate"
+    ]
+   },
+   "benefit": "Tactile feedback.",
+   "cost": "None noticeable.",
+   "battery": "Negligible.",
+   "if_off": "Android.vibrate() does nothing.",
+   "preview": {
+    "available": false,
+    "note": "Needs a real phone."
+   },
+   "test": {
+    "available": true,
+    "how": "Test button vibrates for 200 ms on a real phone."
+   }
+  },
+  {
+   "id": "toast_messages",
+   "name": "Short messages (toast)",
+   "cat": "system",
+   "impl": "native",
+   "status": "available",
+   "summary": "Shows a short pop-up message.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "bridge",
+     "\\bAndroid\\.toast\\s*\\("
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "toast",
+   "does": "Adds Android.toast(text).",
+   "apis": [
+    "Toast"
+   ],
+   "bridge": {
+    "ns": "ui",
+    "methods": [
+     "toast"
+    ],
+    "legacy": [
+     "toast"
+    ]
+   },
+   "benefit": "Quick feedback without dialogs.",
+   "cost": "None.",
+   "if_off": "Android.toast() does nothing.",
+   "preview": {
+    "available": true,
+    "note": "The mock bridge shows the message in the preview."
+   },
+   "test": {
+    "available": true,
+    "how": "Test button shows a toast on a real phone."
+   }
+  },
+  {
+   "id": "share_clipboard",
+   "name": "Share and copy",
+   "cat": "files",
+   "impl": "native",
+   "status": "available",
+   "summary": "Opens the Android share sheet and copies text.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "bridge",
+     "\\bAndroid\\.(share|copy)\\s*\\("
+    ],
+    [
+     "web",
+     "navigator\\.share\\s*\\(|navigator\\.clipboard|execCommand\\(\\s*[\"']copy"
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "share",
+   "does": "Adds Android.share(text) and Android.copy(text).",
+   "apis": [
+    "ACTION_SEND",
+    "ClipboardManager"
+   ],
+   "bridge": {
+    "ns": "share",
+    "methods": [
+     "share",
+     "copy"
+    ],
+    "legacy": [
+     "share",
+     "copy"
+    ]
+   },
+   "benefit": "Users can send content to other apps.",
+   "cost": "Shared text leaves the app.",
+   "privacy": "Content goes to the app the user picks.",
+   "if_off": "Android.share() and Android.copy() do nothing.",
+   "preview": {
+    "available": false,
+    "note": "The share sheet is part of Android."
+   },
+   "test": {
+    "available": true,
+    "how": "Test button opens the share sheet with sample text."
+   }
+  },
+  {
+   "id": "file_picker",
+   "name": "File picker",
+   "cat": "files",
+   "impl": "native",
+   "status": "available",
+   "summary": "Lets the user choose files from the phone.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "web",
+     "<input[^>]*type\\s*=\\s*[\"']?file"
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "files",
+   "does": "Makes <input type=file> work by opening the Android file picker.",
+   "apis": [
+    "ACTION_GET_CONTENT",
+    "WebChromeClient.onShowFileChooser"
+   ],
+   "benefit": "Import files without storage permission.",
+   "cost": "Only files the user picks are readable.",
+   "privacy": "The app sees only the chosen files.",
+   "if_off": "File inputs in your page do nothing.",
+   "preview": {
+    "available": false,
+    "note": "Opens the browser picker in the preview."
+   },
+   "test": {
+    "available": true,
+    "how": "Test button opens the picker."
+   }
+  },
+  {
+   "id": "file_save",
+   "name": "Save files to Downloads",
+   "cat": "files",
+   "impl": "native",
+   "status": "available",
+   "summary": "Saves a file made by your page into the phone Downloads folder.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "bridge",
+     "\\bAndroid\\.saveFile\\s*\\("
+    ],
+    [
+     "web",
+     "\\.download\\s*=|\\sdownload\\s*=\\s*[\"']|showSaveFilePicker"
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "files",
+   "does": "Adds Android.saveFile(name, mime, text).",
+   "apis": [
+    "MediaStore.Downloads"
+   ],
+   "bridge": {
+    "ns": "files",
+    "methods": [
+     "saveFile"
+    ],
+    "legacy": [
+     "saveFile"
+    ]
+   },
+   "benefit": "Exports and backups reach the Downloads folder.",
+   "cost": "Browser-style download links do not work inside a WebView.",
+   "storage": "Writes files the user can see.",
+   "if_off": "Browser-style downloads fail silently.",
+   "preview": {
+    "available": false,
+    "note": "Not previewable in the browser."
+   },
+   "test": {
+    "available": true,
+    "how": "Test button saves a small test.txt to Downloads."
+   },
+   "android": "Saved to the real Downloads folder on Android 10+. On Android 9 and older it is saved in the app folder."
+  },
+  {
+   "id": "text_to_speech",
+   "name": "Read text aloud",
+   "cat": "media",
+   "impl": "native",
+   "status": "available",
+   "summary": "Speaks text using the phone voice.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "bridge",
+     "\\bAndroid\\.speak\\s*\\("
+    ],
+    [
+     "web",
+     "speechSynthesis|SpeechSynthesisUtterance"
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "tts",
+   "does": "Adds Android.speak(text).",
+   "apis": [
+    "TextToSpeech"
+   ],
+   "bridge": {
+    "ns": "speech",
+    "methods": [
+     "speak"
+    ],
+    "legacy": [
+     "speak"
+    ]
+   },
+   "benefit": "Accessibility and language learning.",
+   "cost": "Needs a voice installed on the phone.",
+   "if_off": "Android.speak() does nothing.",
+   "preview": {
+    "available": true,
+    "note": "The browser can speak a sample sentence."
+   },
+   "test": {
+    "available": true,
+    "how": "Test button speaks a sample sentence."
+   }
+  },
+  {
+   "id": "network_info",
+   "name": "Network and version info",
+   "cat": "integration",
+   "impl": "native",
+   "status": "available",
+   "summary": "Tells the page whether the phone is online and the app version.",
+   "perms": [
+    "ACCESS_NETWORK_STATE"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "bridge",
+     "\\bAndroid\\.(isOnline|appVersion)\\s*\\("
+    ],
+    [
+     "web",
+     "navigator\\.onLine|addEventListener\\(\\s*[\"'](online|offline)"
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "info",
+   "does": "Adds Android.isOnline() and Android.appVersion().",
+   "apis": [
+    "ConnectivityManager"
+   ],
+   "bridge": {
+    "ns": "info",
+    "methods": [
+     "isOnline",
+     "appVersion"
+    ],
+    "legacy": [
+     "isOnline",
+     "appVersion"
+    ]
+   },
+   "benefit": "Pages can adapt to offline use.",
+   "cost": "None.",
+   "if_off": "Android.isOnline() reports false.",
+   "preview": {
+    "available": true,
+    "note": "The mock bridge reports a fixed value."
+   },
+   "test": {
+    "available": true,
+    "how": "Test button shows the result."
+   }
+  },
+  {
+   "id": "biometric_lock",
+   "name": "Fingerprint or PIN lock",
+   "cat": "security",
+   "impl": "native",
+   "status": "available",
+   "summary": "Asks for fingerprint, face or screen lock when the app opens.",
+   "perms": [
+    "USE_BIOMETRIC"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "weak",
+     "[Ff]ingerprint|[Bb]iometric|[Ll]ock\\s?[Ss]creen|[Pp][Ii][Nn]\\s?[Ll]ock"
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "biometric",
+   "gradle": [
+    "biometric"
+   ],
+   "does": "Hides the app until the user unlocks it.",
+   "apis": [
+    "BiometricPrompt"
+   ],
+   "benefit": "Protects private data.",
+   "cost": "If the phone has no lock set up, the app opens without one. On Android 10 and older there is no PIN fallback.",
+   "security": "Protects the screen, not the stored data.",
+   "if_off": "The app opens straight away.",
+   "preview": {
+    "available": false,
+    "note": "Not previewable in the browser."
+   },
+   "test": {
+    "available": true,
+    "how": "Reopen the app on a real phone."
+   },
+   "android": "PIN together with biometrics needs Android 11 (API 30)."
+  },
+  {
+   "id": "block_screenshots",
+   "name": "Block screenshots",
+   "cat": "security",
+   "impl": "native",
+   "status": "available",
+   "summary": "Stops screenshots and hides the app in recent apps.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "secure",
+   "does": "Marks the window as secure.",
+   "apis": [
+    "FLAG_SECURE"
+   ],
+   "benefit": "Protects private content.",
+   "cost": "Users cannot take screenshots of the app.",
+   "privacy": "Also blocks screen recording.",
+   "if_off": "Screenshots are allowed.",
+   "preview": {
+    "available": false,
+    "note": "Not previewable in the browser."
+   },
+   "test": {
+    "available": true,
+    "how": "Try a screenshot on a real phone."
+   }
+  },
+  {
+   "id": "fullscreen_mode",
+   "name": "Fullscreen mode",
+   "cat": "system",
+   "impl": "native",
+   "status": "available",
+   "summary": "Hides the status and navigation bars.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [
+    [
+     "web",
+     "requestFullscreen"
+    ]
+   ],
+   "caution": "",
+   "meta_complete": true,
+   "legacy": "fullscreen",
+   "does": "Uses immersive mode; swipe from the edge shows the bars briefly.",
+   "apis": [
+    "WindowInsetsControllerCompat"
+   ],
+   "benefit": "More room for content.",
+   "cost": "System bars are hidden.",
+   "if_off": "System bars stay visible.",
+   "preview": {
+    "available": true,
+    "note": "The display preview hides the bars."
+   },
+   "test": {
+    "available": true,
+    "how": "Open the app on a real phone."
+   }
+  },
+  {
+   "id": "screen_transitions",
+   "name": "Screen animation",
+   "cat": "system",
+   "impl": "native",
+   "status": "available",
+   "summary": "Animates the app opening and closing.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "detect": [],
+   "caution": "",
+   "meta_complete": true,
+   "does": "Fade, slide or zoom when the app screen opens or closes, and a fade when pages load.",
+   "apis": [
+    "overridePendingTransition"
+   ],
+   "settings": {
+    "anim": [
+     "fade",
+     "slide",
+     "zoom"
+    ]
+   },
+   "benefit": "A smoother feel.",
+   "cost": "None.",
+   "if_off": "No animation.",
+   "preview": {
+    "available": true,
+    "note": "The builder preview can play each style."
+   },
+   "test": {
+    "available": true,
+    "how": "Open and close the app."
+   }
+  },
+  {
+   "id": "work_manager_jobs",
+   "name": "Background jobs (WorkManager)",
+   "cat": "alerts",
+   "impl": "native",
+   "status": "planned",
+   "phase": 3,
+   "summary": "Runs deferrable work such as sync and cleanup.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "Not exact timing.",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "recurring_reminders",
+   "name": "Repeating reminders",
+   "cat": "alerts",
+   "impl": "native",
+   "status": "planned",
+   "phase": 3,
+   "summary": "Daily, weekly or custom repeating reminders.",
+   "perms": [],
+   "deps": [
+    "scheduled_reminders"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "Needs a stored recurrence rule.",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "push_fcm",
+   "name": "Push notifications (FCM)",
+   "cat": "alerts",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Messages sent from a server while the app is closed.",
+   "perms": [
+    "POST_NOTIFICATIONS"
+   ],
+   "deps": [
+    "notifications"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Needs a backend server and a Firebase file for each app.",
+   "cost": "",
+   "detect": [
+    [
+     "web",
+     "PushManager|pushManager\\.subscribe"
+    ]
+   ],
+   "meta_complete": false
+  },
+  {
+   "id": "foreground_service",
+   "name": "Foreground service",
+   "cat": "alerts",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Keeps a long visible task running.",
+   "perms": [
+    "FOREGROUND_SERVICE"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Android and Google Play restrict it; each service needs a declared type.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "zip_import_export",
+   "name": "ZIP import and export",
+   "cat": "files",
+   "impl": "native",
+   "status": "planned",
+   "phase": 4,
+   "summary": "Reads and writes ZIP projects safely.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Needs path-traversal and size limits.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "background_transfers",
+   "name": "Background downloads and uploads",
+   "cat": "files",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Transfers files with progress and retry.",
+   "perms": [
+    "INTERNET"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "camera_capture",
+   "name": "Camera",
+   "cat": "media",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Takes photos or video.",
+   "perms": [
+    "CAMERA"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Sensitive permission.",
+   "cost": "",
+   "detect": [
+    [
+     "web",
+     "getUserMedia\\s*\\(\\s*\\{[^}]*video|<input[^>]*capture"
+    ]
+   ],
+   "meta_complete": false
+  },
+  {
+   "id": "photo_picker",
+   "name": "Photo picker",
+   "cat": "media",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Chooses photos without storage permission.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "microphone_recording",
+   "name": "Microphone recording",
+   "cat": "media",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Records audio.",
+   "perms": [
+    "RECORD_AUDIO"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Sensitive permission.",
+   "cost": "",
+   "detect": [
+    [
+     "web",
+     "getUserMedia\\s*\\(\\s*\\{[^}]*audio|MediaRecorder"
+    ]
+   ],
+   "meta_complete": false
+  },
+  {
+   "id": "speech_to_text",
+   "name": "Speech to text",
+   "cat": "media",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Turns speech into text.",
+   "perms": [
+    "RECORD_AUDIO"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Needs the microphone.",
+   "cost": "",
+   "detect": [
+    [
+     "web",
+     "SpeechRecognition|webkitSpeechRecognition"
+    ]
+   ],
+   "meta_complete": false
+  },
+  {
+   "id": "media_playback_background",
+   "name": "Background audio playback",
+   "cat": "media",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Keeps audio playing with the screen off.",
+   "perms": [
+    "FOREGROUND_SERVICE"
+   ],
+   "deps": [
+    "foreground_service"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "location_foreground",
+   "name": "Location (while open)",
+   "cat": "location",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Reads the phone location while the app is open.",
+   "perms": [
+    "ACCESS_FINE_LOCATION",
+    "ACCESS_COARSE_LOCATION"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Sensitive permission and privacy impact.",
+   "cost": "",
+   "detect": [
+    [
+     "web",
+     "navigator\\.geolocation"
+    ]
+   ],
+   "meta_complete": false
+  },
+  {
+   "id": "location_background",
+   "name": "Location (in the background)",
+   "cat": "location",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Reads location while the app is closed.",
+   "perms": [
+    "ACCESS_BACKGROUND_LOCATION"
+   ],
+   "deps": [
+    "location_foreground"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Needs a Google Play declaration and uses more battery. Enable only if truly required.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "geofencing",
+   "name": "Geofencing",
+   "cat": "location",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Alerts when the phone enters or leaves an area.",
+   "perms": [],
+   "deps": [
+    "location_background"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "maps",
+   "name": "Maps",
+   "cat": "location",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Shows maps and routes.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Google Maps needs an API key; OpenStreetMap in HTML needs none.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "bluetooth_le",
+   "name": "Bluetooth LE",
+   "cat": "hardware",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Talks to nearby Bluetooth devices.",
+   "perms": [
+    "BLUETOOTH_SCAN",
+    "BLUETOOTH_CONNECT"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [
+    [
+     "web",
+     "navigator\\.bluetooth"
+    ]
+   ],
+   "meta_complete": false
+  },
+  {
+   "id": "nfc",
+   "name": "NFC",
+   "cat": "hardware",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Reads NFC tags.",
+   "perms": [
+    "NFC"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [
+    [
+     "web",
+     "NDEFReader"
+    ]
+   ],
+   "meta_complete": false
+  },
+  {
+   "id": "sensors",
+   "name": "Device sensors",
+   "cat": "hardware",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Reads motion and other sensors.",
+   "perms": [
+    "ACTIVITY_RECOGNITION"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [
+    [
+     "web",
+     "DeviceMotionEvent|DeviceOrientationEvent|Accelerometer|Gyroscope"
+    ]
+   ],
+   "meta_complete": false
+  },
+  {
+   "id": "secure_storage",
+   "name": "Secure storage",
+   "cat": "security",
+   "impl": "native",
+   "status": "planned",
+   "phase": 3,
+   "summary": "Stores tokens and secrets encrypted.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "deep_links",
+   "name": "Deep links",
+   "cat": "integration",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Opens the app from links.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "app_links",
+   "name": "Verified app links",
+   "cat": "integration",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Opens the app from your own web links without a chooser.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Needs a website you control (assetlinks.json).",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "app_shortcuts",
+   "name": "Home-screen shortcuts",
+   "cat": "integration",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Long-press shortcuts to app screens.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "widgets",
+   "name": "Home-screen widgets",
+   "cat": "integration",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Small live panels on the home screen.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "local_database",
+   "name": "Local database (Room)",
+   "cat": "data",
+   "impl": "native",
+   "status": "planned",
+   "phase": 3,
+   "summary": "Reliable structured storage for background work.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "backup_restore",
+   "name": "Backup and restore",
+   "cat": "data",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Exports and restores app data.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "cloud_sync",
+   "name": "Cloud sync",
+   "cat": "accounts",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Keeps data in sync across devices.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Needs a backend server.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "hosted_database",
+   "name": "Hosted database",
+   "cat": "accounts",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Stores app data on a server.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Needs a backend and privacy disclosures.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "authentication",
+   "name": "Sign-in accounts",
+   "cat": "accounts",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Username or token based sign-in.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Needs a server; tokens must use secure storage.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "oauth_sign_in",
+   "name": "OAuth / social sign-in",
+   "cat": "accounts",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Sign in with an external provider.",
+   "perms": [],
+   "deps": [
+    "authentication"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Needs provider setup and Custom Tabs.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "analytics",
+   "name": "Analytics",
+   "cat": "quality",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Counts feature usage.",
+   "perms": [
+    "INTERNET"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Privacy and Play data-safety disclosure required; off by default.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "crash_reporting",
+   "name": "Crash reporting",
+   "cat": "quality",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Sends crash reports.",
+   "perms": [
+    "INTERNET"
+   ],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Privacy and Play data-safety disclosure required; off by default.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "emulator_testing",
+   "name": "Emulator testing",
+   "cat": "quality",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Runs the app on test devices automatically.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "Slow on free build servers.",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "release_apk",
+   "name": "Release APK",
+   "cat": "build",
+   "impl": "native",
+   "status": "planned",
+   "phase": 2,
+   "summary": "Optimised, signed APK for direct installation.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "aab_bundle",
+   "name": "Android App Bundle (AAB)",
+   "cat": "build",
+   "impl": "native",
+   "status": "planned",
+   "phase": 2,
+   "summary": "Upload format for Google Play.",
+   "perms": [],
+   "deps": [
+    "app_signing"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "app_signing",
+   "name": "App signing and keystore",
+   "cat": "build",
+   "impl": "native",
+   "status": "planned",
+   "phase": 2,
+   "summary": "Signs releases with your own key.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Losing the key blocks future updates.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "play_publish",
+   "name": "Google Play publishing",
+   "cat": "build",
+   "impl": "native",
+   "status": "planned",
+   "phase": 7,
+   "summary": "Uploads builds to Google Play automatically.",
+   "perms": [],
+   "deps": [
+    "aab_bundle"
+   ],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Needs a Play developer account and a service-account secret; uploads go to the internal test track first.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "plugin_system",
+   "name": "Plugin / extension system",
+   "cat": "extend",
+   "impl": "native",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Adds new native capabilities as plugins.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "remote_config",
+   "name": "Remote content updates",
+   "cat": "extend",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Updates data or content without a new APK.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "Data only; downloading executable code is not allowed by Google Play.",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "localization_rtl",
+   "name": "Languages and right-to-left",
+   "cat": "extend",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Multiple languages and RTL layouts.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  },
+  {
+   "id": "accessibility_tools",
+   "name": "Accessibility checks",
+   "cat": "extend",
+   "impl": "hybrid",
+   "status": "planned",
+   "phase": 8,
+   "summary": "Checks labels, contrast and touch sizes.",
+   "perms": [],
+   "deps": [],
+   "conflicts": [],
+   "min_sdk": 21,
+   "caution": "",
+   "cost": "",
+   "detect": [],
+   "meta_complete": false
+  }
+ ]
+}

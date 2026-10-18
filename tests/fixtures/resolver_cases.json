@@ -1,0 +1,179 @@
+[
+ {
+  "name": "offline MCQ app (nothing selected)",
+  "selected": [],
+  "appMin": 24,
+  "expect": {
+   "enabled": [
+    "webview_host",
+    "offline_assets",
+    "external_links"
+   ],
+   "permissions": [
+    "ACCESS_NETWORK_STATE"
+   ],
+   "issue_codes": []
+  }
+ },
+ {
+  "name": "reminders only",
+  "selected": [
+   "scheduled_reminders"
+  ],
+  "appMin": 24,
+  "expect": {
+   "enabled": [
+    "webview_host",
+    "offline_assets",
+    "external_links",
+    "notifications",
+    "scheduled_reminders"
+   ],
+   "permissions": [
+    "ACCESS_NETWORK_STATE",
+    "POST_NOTIFICATIONS"
+   ],
+   "issue_codes": []
+  }
+ },
+ {
+  "name": "reminders with restart recovery and exact time",
+  "selected": [
+   "scheduled_reminders",
+   "boot_recovery",
+   "exact_alarms"
+  ],
+  "appMin": 24,
+  "expect": {
+   "enabled": [
+    "webview_host",
+    "offline_assets",
+    "external_links",
+    "notifications",
+    "scheduled_reminders",
+    "boot_recovery",
+    "exact_alarms"
+   ],
+   "permissions": [
+    "ACCESS_NETWORK_STATE",
+    "POST_NOTIFICATIONS",
+    "RECEIVE_BOOT_COMPLETED",
+    "SCHEDULE_EXACT_ALARM"
+   ],
+   "issue_codes": []
+  }
+ },
+ {
+  "name": "fingerprint lock",
+  "selected": [
+   "biometric_lock"
+  ],
+  "appMin": 24,
+  "expect": {
+   "enabled": [
+    "webview_host",
+    "offline_assets",
+    "external_links",
+    "biometric_lock"
+   ],
+   "permissions": [
+    "ACCESS_NETWORK_STATE",
+    "USE_BIOMETRIC"
+   ],
+   "issue_codes": []
+  }
+ },
+ {
+  "name": "dependency chain of a planned feature",
+  "selected": [
+   "geofencing"
+  ],
+  "appMin": 24,
+  "expect": {
+   "enabled": [
+    "webview_host",
+    "offline_assets",
+    "external_links",
+    "location_foreground",
+    "location_background",
+    "geofencing"
+   ],
+   "permissions": [
+    "ACCESS_BACKGROUND_LOCATION",
+    "ACCESS_COARSE_LOCATION",
+    "ACCESS_FINE_LOCATION",
+    "ACCESS_NETWORK_STATE"
+   ],
+   "issue_codes": [
+    "UNSUPPORTED",
+    "UNSUPPORTED",
+    "UNSUPPORTED"
+   ]
+  }
+ },
+ {
+  "name": "camera is planned, not implemented",
+  "selected": [
+   "camera_capture"
+  ],
+  "appMin": 24,
+  "expect": {
+   "enabled": [
+    "webview_host",
+    "offline_assets",
+    "external_links",
+    "camera_capture"
+   ],
+   "permissions": [
+    "ACCESS_NETWORK_STATE",
+    "CAMERA"
+   ],
+   "issue_codes": [
+    "UNSUPPORTED"
+   ]
+  }
+ },
+ {
+  "name": "unknown feature id",
+  "selected": [
+   "nope"
+  ],
+  "appMin": 24,
+  "expect": {
+   "enabled": [
+    "webview_host",
+    "offline_assets",
+    "external_links"
+   ],
+   "permissions": [
+    "ACCESS_NETWORK_STATE"
+   ],
+   "issue_codes": [
+    "UNKNOWN_FEATURE"
+   ]
+  }
+ },
+ {
+  "name": "files and sharing",
+  "selected": [
+   "file_picker",
+   "file_save",
+   "share_clipboard"
+  ],
+  "appMin": 24,
+  "expect": {
+   "enabled": [
+    "webview_host",
+    "offline_assets",
+    "external_links",
+    "share_clipboard",
+    "file_picker",
+    "file_save"
+   ],
+   "permissions": [
+    "ACCESS_NETWORK_STATE"
+   ],
+   "issue_codes": []
+  }
+ }
+]

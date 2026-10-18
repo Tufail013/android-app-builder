@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "compileSdk": 36,
+  "targetSdk": 36,
+  "minSdkFloor": 23,
+  "allowLowerTarget": false,
+  "agp": "8.13.0",
+  "gradle": "8.13",
+  "java": "17",
+  "buildTools": "36.0.0",
+  "deps": {
+    "appcompat": "androidx.appcompat:appcompat:1.7.1",
+    "core": "androidx.core:core:1.16.0",
+    "activity": "androidx.activity:activity:1.10.1",
+    "swiperefresh": "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0",
+    "webkit": "androidx.webkit:webkit:1.14.0",
+    "biometric": "androidx.biometric:biometric:1.1.0"
+  },
+  "baseDeps": ["appcompat", "core", "activity", "swiperefresh", "webkit", "biometric"],
+  "notes": "Change compileSdk/targetSdk/agp/gradle here when Google Play raises the target level. AGP 8.13 supports up to API 36. biometric stays in baseDeps until per-capability Java modules arrive (phase 3)."
+}

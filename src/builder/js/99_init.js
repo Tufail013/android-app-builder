@@ -1,0 +1,1 @@
+applyTheme();load();render();

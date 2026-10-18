@@ -1,0 +1,82 @@
+{
+ "format": "hab-build-config-1",
+ "buildPerformed": false,
+ "config": {
+  "app": {
+   "name": "Quiz App",
+   "pkg": "com.example.quiz",
+   "vc": "2",
+   "vn": "1.1",
+   "min": "24",
+   "target": "34",
+   "max": "",
+   "scheme": ""
+  },
+  "src": {
+   "type": "blank",
+   "file": "",
+   "html": "<!DOCTYPE html><html><head><title>Quiz</title></head><body><h1>Quiz</h1></body></html>"
+  },
+  "disp": {
+   "orient": "auto",
+   "status": true,
+   "action": false,
+   "keepOn": false,
+   "cutout": "default",
+   "desktop": false,
+   "wm": false,
+   "primary": "#22d3ee",
+   "loadBg": "#000000",
+   "statusColor": "#000000",
+   "navColor": "#000000",
+   "transp": false,
+   "tint": "auto"
+  },
+  "perms": [],
+  "icon": {
+   "name": "",
+   "data": ""
+  },
+  "splash": {
+   "on": true,
+   "bg": "#000000",
+   "style": "ring",
+   "loader": "#22d3ee",
+   "ring": "#333333",
+   "img": {
+    "name": "",
+    "data": ""
+   },
+   "iconSize": "96",
+   "radius": "20",
+   "loaderSize": "40",
+   "gap": "24",
+   "dur": "2000",
+   "thick": "4",
+   "fade": "300"
+  },
+  "wv": {
+   "js": true
+  },
+  "feat": {
+   "notify": false,
+   "reminders": false,
+   "vibrate": false,
+   "toast": false,
+   "share": false,
+   "files": false,
+   "tts": false,
+   "info": false,
+   "biometric": false,
+   "secure": false,
+   "fullscreen": false,
+   "anim": "none"
+  },
+  "ads": {
+   "on": false
+  },
+  "out": {
+   "format": "apk"
+  }
+ }
+}
