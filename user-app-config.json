@@ -1,0 +1,84 @@
+{
+ "format": "hab-build-config-1",
+ "buildPerformed": false,
+ "config": {
+  "app": {
+   "name": "Liquid Glass App",
+   "pkg": "com.example.liquidglass",
+   "vc": "1",
+   "vn": "1.0.0",
+   "min": "24",
+   "target": "34",
+   "max": "",
+   "scheme": ""
+  },
+  "src": {
+   "type": "file",
+   "file": "index.html",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>Liquid Glass App</title>\n<style>\n*{box-sizing:border-box}\nbody{font-family:system-ui,sans-serif;color:#1e293b;margin:0;padding:24px 16px;background:linear-gradient(135deg,#a5b4fc,#f0abfc,#93c5fd,#fda4af);background-attachment:fixed;min-height:100vh;text-align:center}\nh1{color:#fff;text-shadow:0 2px 20px #0003;font-size:28px}\n.glass{background:rgba(255,255,255,.45);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border:1px solid rgba(255,255,255,.7);border-radius:24px;padding:22px;margin:16px auto;max-width:420px;box-shadow:0 8px 32px rgba(31,38,135,.18)}\nbutton{border:0;border-radius:20px;padding:13px 24px;font-size:17px;margin:6px;background:rgba(255,255,255,.75);box-shadow:0 4px 16px #0002}\n#n{font-size:52px;margin:6px}\n</style>\n</head>\n<body>\n<h1>\u2728 Liquid Glass App</h1>\n<div class=\"glass\">\n<p>A beautiful sample app. Frosted glass, soft colours, large buttons.</p>\n<div id=\"n\">0</div>\n<button onclick=\"document.getElementById('n').textContent=+document.getElementById('n').textContent+1\">+1 Tap me</button>\n<button onclick=\"if(window.Android&&Android.toast){Android.toast('Hello from Liquid Glass')}else{alert('Hello from Liquid Glass')}\">Say Hello</button>\n<button onclick=\"if(window.Android&&Android.vibrate){Android.vibrate(100)}else{alert('Vibrate works only in the real app')}\">Vibrate</button>\n</div>\n<div class=\"glass\"><b>Try this:</b> Put this HTML into the converter, and your app will look like this.</div>\n</body>\n</html>\n"
+  },
+  "disp": {
+   "orient": "auto",
+   "status": true,
+   "action": false,
+   "keepOn": false,
+   "cutout": "default",
+   "desktop": false,
+   "wm": false,
+   "primary": "#22d3ee",
+   "loadBg": "#000000",
+   "statusColor": "#000000",
+   "navColor": "#000000",
+   "transp": false,
+   "tint": "auto"
+  },
+  "perms": [
+   "INTERNET"
+  ],
+  "icon": {
+   "name": "",
+   "data": ""
+  },
+  "splash": {
+   "on": true,
+   "bg": "#000000",
+   "style": "ring",
+   "loader": "#22d3ee",
+   "ring": "#333333",
+   "img": {
+    "name": "",
+    "data": ""
+   },
+   "iconSize": "96",
+   "radius": "20",
+   "loaderSize": "40",
+   "gap": "24",
+   "dur": "2000",
+   "thick": "4",
+   "fade": "300"
+  },
+  "wv": {
+   "js": true
+  },
+  "feat": {
+   "notify": true,
+   "reminders": true,
+   "vibrate": true,
+   "toast": true,
+   "share": true,
+   "files": true,
+   "tts": true,
+   "info": true,
+   "biometric": false,
+   "secure": false,
+   "fullscreen": false,
+   "anim": "slide"
+  },
+  "ads": {
+   "on": false
+  },
+  "out": {
+   "format": "apk"
+  }
+ }
+}
