@@ -1,0 +1,62 @@
+name: Build APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore: ['update.zip', 'docs/**', 'README.md']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read platform.json (SDK, Gradle and Java versions)
+        id: plat
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          p = json.load(open('platform.json'))
+          print('java=' + p['java'])
+          print('gradle=' + p['gradle'])
+          print('compile=' + str(p['compileSdk']))
+          print('buildtools=' + p['buildTools'])
+          PY
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ steps.plat.outputs.java }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pillow
+      - name: Self-tests (registry, resolver, migration, update checker)
+        continue-on-error: true
+        run: |
+          python3 tests/run_tests.py
+          node tests/resolver.test.js
+      - name: Bundle the builder page from src/builder
+        run: |
+          if [ -f src/builder/index.template.html ]; then python3 tools/bundle.py; else echo "No src/builder, using index*.html from the main folder"; fi
+      - name: Prepare config.json (schema 2, newest page, file saving on)
+        run: python3 tools/prepare_config.py --ensure file_picker,file_save
+      - name: Generate the Android project
+        run: python3 generate.py --config config.json
+      - name: Install Android platform (optional)
+        continue-on-error: true
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-${{ steps.plat.outputs.compile }}" "build-tools;${{ steps.plat.outputs.buildtools }}"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ steps.plat.outputs.gradle }}
+      - run: gradle assembleDebug --stacktrace
+        working-directory: build_app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-apk
+          path: build_app/app/build/outputs/apk/debug/*.apk
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-report
+          path: build-report/
+          if-no-files-found: ignore
