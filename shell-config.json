@@ -1,0 +1,84 @@
+{
+ "format": "hab-build-config-1",
+ "buildPerformed": false,
+ "config": {
+  "app": {
+   "name": "Shell Runner",
+   "pkg": "com.example.shellrunner",
+   "vc": "1",
+   "vn": "1.0.0",
+   "min": "24",
+   "target": "34",
+   "max": "",
+   "scheme": ""
+  },
+  "src": {
+   "type": "file",
+   "file": "index.html",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>Shell Runner - HTML to App, Instant</title>\n<style>\n*{box-sizing:border-box}\nbody{margin:0;font-family:system-ui,sans-serif;background:#e6e9ef;color:#111}\nbody.dark{background:#0a0a0a;color:#fff}\n.top{padding:18px;max-width:720px;margin:auto}\nh1{font-size:32px;line-height:1;margin:8px 0}\nh1 span{display:block;color:transparent;-webkit-text-stroke:2px #111}\nbody.dark h1 span{-webkit-text-stroke:2px #fff}\np{color:#555;line-height:1.6}\nbody.dark p{color:#aab4c5}\n.card{background:#e6e9ef;border-radius:24px;padding:20px;margin:16px 0;box-shadow:8px 8px 20px #c3c9d6,-8px -8px 20px #fff}\nbody.dark .card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(18px);box-shadow:none}\ninput,textarea{width:100%;padding:13px;border-radius:14px;border:1px solid #ccc;font-size:16px;margin:8px 0;background:#fff}\nbody.dark input,body.dark textarea{background:#222;color:#fff;border-color:#444}\nbutton{border:0;border-radius:16px;padding:13px 22px;font-size:16px;margin:6px 6px 6px 0;background:#fff;color:#111;cursor:pointer;font-weight:600;box-shadow:4px 4px 12px #c3c9d6,-4px -4px 12px #fff}\nbody.dark button{background:rgba(255,255,255,.12);color:#fff;box-shadow:none;border:1px solid rgba(255,255,255,.2)}\nbutton.black{background:#111;color:#fff}\nbody.dark button.black{background:#fff;color:#111}\n#runner{display:none;position:fixed;inset:0;background:#fff;z-index:99}\n#runner iframe{width:100%;height:100%;border:0}\n#exit{position:fixed;top:10px;right:10px;z-index:100;background:#111;color:#fff;border-radius:20px;padding:10px 16px}\nbody.dark #exit{background:#fff;color:#111}\n.track{width:110px;height:52px;border-radius:30px;background:#fff;box-shadow:inset 3px 3px 8px #c3c9d6;position:relative;cursor:pointer;display:inline-block}\nbody.dark .track{background:#222}\n.knob{position:absolute;top:6px;left:6px;width:40px;height:40px;border-radius:50%;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;transition:left .3s}\nbody.dark .knob{left:64px;background:#fff;color:#111}\n</style>\n</head>\n<body>\n<div class=\"top\" id=\"editor\">\n<h1>SHELL RUNNER<br><span>HTML TO APP, INSTANT</span></h1>\n<p><b>Shell method, simply:</b> This app is already built. It is a ready shell. Your HTML is put inside the shell and runs at once, with no Gradle compile each time. That is how the example app works, in principle. This version is original, built from your own project.</p>\n<div class=\"card\">\n<b>Step 1 - Your HTML</b>\n<input type=\"file\" accept=\".html,.htm\" onchange=\"readFile(this)\">\n<textarea id=\"html\" rows=\"7\" placeholder=\"Paste your HTML here, or choose a file. Try: <h1>Hello</h1><button onclick=&quot;Android.toast('Hello')&quot;>Say Hello</button>\"></textarea>\n<input id=\"name\" placeholder=\"App name (for later standalone APK)\" value=\"My HTML App\">\n<button class=\"black\" onclick=\"runApp()\">\u25b6 Run as App - Instant</button>\n<button onclick=\"exportConfig()\">Export config for standalone APK</button>\n<p id=\"msg\"></p>\n</div>\n<div class=\"card\">\n<b>Dark / White</b>\n<div class=\"track\" onclick=\"document.body.classList.toggle('dark');document.getElementById('knob').textContent=document.body.classList.contains('dark')?'\u263e':'\u2600'\"><div class=\"knob\" id=\"knob\">\u2600</div></div>\n<p style=\"margin:8px 0 0\">This changes the shell look only, not your HTML.</p>\n</div>\n<div class=\"card\">\n<b>What works instantly in the shell:</b>\n<p>Toast, vibrate, share, copy, notify, text to speech, file save, network info - through the Android bridge, proxied to your HTML. Camera, location, microphone and maps are not in this shell yet, and will be added as native bridge methods, not faked.</p>\n<b>What is next, after this runner works:</b>\n<p>Standalone APK output: take this same shell APK, replace its HTML inside the APK file itself, and sign it again, on the phone. That is the second half of the shell method. It needs its own testing, and I will build it after this runner is confirmed working.</p>\n</div>\n</div>\n<div id=\"runner\">\n<button id=\"exit\" onclick=\"exitApp()\">\u2715 Exit App</button>\n<iframe id=\"frame\"></iframe>\n</div>\n<script>\n// Android proxy shim, injected into the user's HTML before it runs in the iframe.\nvar SHIM = \"<script>window.Android={toast:function(m){parent.postMessage({t:'android',m:'toast',a:[m]},'*')},vibrate:function(ms){parent.postMessage({t:'android',m:'vibrate',a:[ms]},'*')},share:function(x){parent.postMessage({t:'android',m:'share',a:[x]},'*')},copy:function(x){parent.postMessage({t:'android',m:'copy',a:[x]},'*')},notify:function(t,m){parent.postMessage({t:'android',m:'notify',a:[t,m]},'*')},speak:function(x){parent.postMessage({t:'android',m:'speak',a:[x]},'*')},saveFile:function(n,mi,tx){parent.postMessage({t:'android',m:'saveFile',a:[n,mi,tx]},'*');return 'saved'},isOnline:function(){return true}};<\\/script>\";\nfunction readFile(el){var r=new FileReader();r.onload=function(){document.getElementById('html').value=r.result};r.readAsText(el.files[0])}\nfunction runApp(){\n var h=document.getElementById('html').value.trim();\n if(!h){document.getElementById('msg').textContent='Paste or choose HTML first.';return}\n try{localStorage.setItem('shell_html',h)}catch(e){}\n var withShim = h.indexOf('<head')>=0 ? h.replace(/<head[^>]*>/i, function(m){return m+SHIM}) : SHIM+h;\n document.getElementById('frame').srcdoc = withShim;\n document.getElementById('runner').style.display='block';\n}\nfunction exitApp(){document.getElementById('runner').style.display='none'}\nwindow.addEventListener('message',function(e){\n if(!e.data||e.data.t!=='android')return;\n var m=e.data.m, a=e.data.a||[];\n try{\n  if(window.Android && Android[m]){ Android[m].apply(null,a); }\n  else if(m==='toast'){alert(a[0])}\n  else if(m==='share'){alert('Share: '+a[0])}\n  else {alert(m+' works only in the real APK shell')}\n }catch(err){alert(m+' - '+err)}\n});\nwindow.addEventListener('load',function(){\n try{var h=localStorage.getItem('shell_html'); if(h) document.getElementById('html').value=h;}catch(e){}\n});\nfunction exportConfig(){\n var cfg={format:'hab-build-config-1',config:{app:{name:document.getElementById('name').value,pkg:'com.example.shellapp'},src:{type:'file',file:'index.html',html:document.getElementById('html').value}}};\n var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(cfg)],{type:'application/json'}));a.download='config.json';a.click();\n document.getElementById('msg').textContent='config.json exported. Use it for a standalone APK build, until in-app repackaging is ready.'}\n</script>\n</body>\n</html>\n"
+  },
+  "disp": {
+   "orient": "auto",
+   "status": true,
+   "action": false,
+   "keepOn": false,
+   "cutout": "default",
+   "desktop": false,
+   "wm": false,
+   "primary": "#22d3ee",
+   "loadBg": "#000000",
+   "statusColor": "#000000",
+   "navColor": "#000000",
+   "transp": false,
+   "tint": "auto"
+  },
+  "perms": [
+   "INTERNET"
+  ],
+  "icon": {
+   "name": "",
+   "data": ""
+  },
+  "splash": {
+   "on": true,
+   "bg": "#000000",
+   "style": "ring",
+   "loader": "#22d3ee",
+   "ring": "#333333",
+   "img": {
+    "name": "",
+    "data": ""
+   },
+   "iconSize": "96",
+   "radius": "20",
+   "loaderSize": "40",
+   "gap": "24",
+   "dur": "2000",
+   "thick": "4",
+   "fade": "300"
+  },
+  "wv": {
+   "js": true
+  },
+  "feat": {
+   "notify": true,
+   "reminders": true,
+   "vibrate": true,
+   "toast": true,
+   "share": true,
+   "files": true,
+   "tts": true,
+   "info": true,
+   "biometric": false,
+   "secure": false,
+   "fullscreen": false,
+   "anim": "slide"
+  },
+  "ads": {
+   "on": false
+  },
+  "out": {
+   "format": "apk"
+  }
+ }
+}
