@@ -366,6 +366,10 @@ public class MainActivity extends AppCompatActivity {
       if (!f.optBoolean("files")) return "disabled";
       return ApkPackager.build(MainActivity.this, html, name);
     }
+    @JavascriptInterface public String buildStandalone2(String html, String appName, String pkg) {
+      if (!f.optBoolean("files")) return "disabled";
+      return ApkPackager.build2(MainActivity.this, html, appName, pkg);
+    }
     @JavascriptInterface public String openStandalone() {
       return ApkPackager.openLast(MainActivity.this);
     }

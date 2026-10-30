@@ -35,7 +35,23 @@ import java.util.zip.ZipOutputStream;
 import javax.security.auth.x500.X500Principal;
 
 /**
- * Shell Packager, v1 — original code, no external signing library.
+ * Shell Packager, v2 — original code, no external signing library.
+ *
+ * v2 adds manifest renaming (see renameManifest): the output APK's
+ * manifest package, its custom permission name and its provider
+ * authority are changed to the user's package, and the application
+ * label is changed from a resource reference to the user's app name
+ * as a literal string. Component names in the manifest are already
+ * fully qualified in this template (for example
+ * com.example.shellpackager.MainActivity), so they are left alone and
+ * still resolve to the classes in the dex, even though the manifest
+ * package has changed. The dex class names are NOT renamed, and the
+ * compiled resources (resources.arsc) are NOT rebuilt: the label
+ * override in the manifest is what the home screen shows, and all
+ * resource lookups in this template use compiled R constants, not
+ * getIdentifier() with a package name. If a future template adds a
+ * FileProvider, a custom permission used by another app, or a
+ * getIdentifier() lookup, this section must be revisited.
  *
  * What it does, in plain steps:
  *  1. Copies the running app's own APK (its shell).
@@ -62,20 +78,23 @@ import javax.security.auth.x500.X500Principal;
  * Directory offset field is treated as the signing-block offset when the
  * digest is computed, as the spec requires.
  *
- * Honest v1 limits (do not hide these from the user):
- *  - The output keeps the packager's package name and launcher name, because
- *    renaming those means rewriting the binary AndroidManifest and the
- *    compiled string resources, which v1 does not do. So the output cannot
- *    be installed on a phone that still has the packager installed (same
- *    package, different signer). It installs cleanly on a phone without the
- *    packager, which is the normal sharing case. The output file name comes
- *    from the app-name field, but the launcher name shown on the phone is
- *    still the packager's name in v1.
+ * Honest v2 limits (do not hide these from the user):
+ *  - The output keeps the packager's dex class names and its icon.
+ *    Only the manifest package, the custom permission name, the
+ *    provider authority, the home-screen label and the file name
+ *    change. The icon shown on the home screen is still the
+ *    packager's icon in v2, because icons live in compiled resources.
+ *  - The output's versionCode stays at the packager's versionCode.
+ *    A later output with the same package and the same signer can
+ *    replace the first one on a phone, but it is not a Play-style
+ *    version upgrade.
+ *  - If the user asks for the packager's own package, v2 refuses:
+ *    that output could never be installed alongside the packager.
  *  - ZIP alignment extra fields are not preserved. The template has no
  *    native (.so) libraries, so this does not affect installation.
- *  - This code has NOT been run on a phone yet. The generate step only
- *    proves the project generates; a real phone install test is still
- *    required before anyone is told it works.
+ *  - This code has NOT been compiled on this machine (no Java here)
+ *    and NOT been run on a phone yet. A real phone install test is
+ *    still required before anyone is told v2 renaming works.
  */
 public class ApkPackager {
   static final String KEY_ALIAS = "shellpackager_signer";
@@ -213,16 +232,205 @@ public class ApkPackager {
     return -1;
   }
 
+
+  // ---- v2: app-name / package cleaning ----
+  static String cleanAppName(String raw) {
+    if (raw == null) return "MyApp";
+    String t = raw.trim();
+    if (t.isEmpty()) return "MyApp";
+    if (t.length() > 50) t = t.substring(0, 50).trim();
+    if (t.isEmpty()) return "MyApp";
+    return t;
+  }
+  static String cleanPackage(String input, String label) {
+    String pkg = input == null ? "" : input.trim().toLowerCase();
+    if (pkg.isEmpty()) {
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < label.length(); i++) {
+        char c = Character.toLowerCase(label.charAt(i));
+        if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) sb.append(c);
+      }
+      if (sb.length() == 0) sb.append("myapp");
+      pkg = "com.example." + sb.toString();
+    }
+    if (pkg.length() > 100) return null;
+    String[] parts = pkg.split("\\.");
+    if (parts.length < 2) return null;
+    for (String part : parts) {
+      if (part.isEmpty()) return null;
+      char first = part.charAt(0);
+      if (first < 'a' || first > 'z') return null;
+      for (int i = 0; i < part.length(); i++) {
+        char c = part.charAt(i);
+        if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_')) return null;
+      }
+    }
+    return pkg;
+  }
+
+  // ---- v2: binary AndroidManifest.xml renaming ----
+  static int readU16(byte[] b, int off) {
+    return (b[off] & 0xff) | ((b[off + 1] & 0xff) << 8);
+  }
+  static void writeLe16(ByteArrayOutputStream o, int v) {
+    o.write(v & 0xff); o.write((v >> 8) & 0xff);
+  }
+  static void writeLe32(ByteArrayOutputStream o, int v) {
+    o.write(v & 0xff); o.write((v >> 8) & 0xff); o.write((v >> 16) & 0xff); o.write((v >> 24) & 0xff);
+  }
+  static void putLe32(byte[] b, int off, int v) {
+    b[off] = (byte) (v & 0xff); b[off + 1] = (byte) ((v >> 8) & 0xff);
+    b[off + 2] = (byte) ((v >> 16) & 0xff); b[off + 3] = (byte) ((v >> 24) & 0xff);
+  }
+  static void setStringAttr(byte[] b, int attrOff, int newIdx) {
+    putLe32(b, attrOff + 8, newIdx); // rawValue
+    b[attrOff + 12 + 3] = 3; // dataType = STRING
+    putLe32(b, attrOff + 12 + 4, newIdx); // data
+  }
+  static byte[] renameManifest(byte[] orig, String oldPkg, String newPkg, String newLabel) throws Exception {
+    if (orig.length < 8 || orig[0] != 0x03 || orig[1] != 0x00 || orig[2] != 0x08 || orig[3] != 0x00)
+      throw new Exception("AndroidManifest.xml is not a binary manifest");
+    int poolOff = 8;
+    if (readU16(orig, poolOff) != 0x0001) throw new Exception("AndroidManifest.xml has no string pool");
+    int poolHeaderSize = readU16(orig, poolOff + 2);
+    int poolSize = readLe32(orig, poolOff + 4);
+    int count = readLe32(orig, poolOff + 8);
+    int styleCount = readLe32(orig, poolOff + 12);
+    int flags = readLe32(orig, poolOff + 16);
+    int stringsOff = readLe32(orig, poolOff + 20);
+    if (poolHeaderSize != 28) throw new Exception("Unexpected manifest string-pool header");
+    if (styleCount != 0) throw new Exception("Manifest string pool has styles, v2 renaming does not support it");
+    if ((flags & 0x100) != 0) throw new Exception("Manifest string pool is UTF-8, v2 renaming supports UTF-16 only");
+    if (poolOff + poolSize > orig.length) throw new Exception("Manifest string pool runs past the file");
+    List<String> strings = new ArrayList<String>();
+    for (int i = 0; i < count; i++) {
+      int strOff = readLe32(orig, poolOff + 28 + i * 4);
+      int pos = poolOff + stringsOff + strOff;
+      int len = readU16(orig, pos); pos += 2;
+      if ((len & 0x8000) != 0) { len = ((len & 0x7fff) << 16) | readU16(orig, pos); pos += 2; }
+      StringBuilder sb = new StringBuilder();
+      for (int j = 0; j < len; j++) sb.append((char) readU16(orig, pos + j * 2));
+      strings.add(sb.toString());
+    }
+    int oldPermIdx = strings.indexOf(oldPkg + ".DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION");
+    int oldAuthIdx = strings.indexOf(oldPkg + ".androidx-startup");
+    List<String> nstrings = new ArrayList<String>(strings);
+    int newPkgIdx = nstrings.indexOf(newPkg);
+    if (newPkgIdx < 0) { nstrings.add(newPkg); newPkgIdx = nstrings.size() - 1; }
+    int newLabelIdx = nstrings.indexOf(newLabel);
+    if (newLabelIdx < 0) { nstrings.add(newLabel); newLabelIdx = nstrings.size() - 1; }
+    int newPermIdx = -1;
+    if (oldPermIdx >= 0) {
+      String np = newPkg + ".DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION";
+      newPermIdx = nstrings.indexOf(np);
+      if (newPermIdx < 0) { nstrings.add(np); newPermIdx = nstrings.size() - 1; }
+    }
+    int newAuthIdx = -1;
+    if (oldAuthIdx >= 0) {
+      String na = newPkg + ".androidx-startup";
+      newAuthIdx = nstrings.indexOf(na);
+      if (newAuthIdx < 0) { nstrings.add(na); newAuthIdx = nstrings.size() - 1; }
+    }
+    // Rebuild the string pool with the same UTF-16 encoding.
+    ByteArrayOutputStream dataOut = new ByteArrayOutputStream();
+    List<Integer> newOffsets = new ArrayList<Integer>();
+    for (String st : nstrings) {
+      newOffsets.add(dataOut.size());
+      int len = st.length();
+      if (len < 0x8000) writeLe16(dataOut, len);
+      else { writeLe16(dataOut, 0x8000 | (len >> 16)); writeLe16(dataOut, len & 0xffff); }
+      for (int j = 0; j < len; j++) writeLe16(dataOut, st.charAt(j));
+      writeLe16(dataOut, 0);
+    }
+    while (dataOut.size() % 4 != 0) dataOut.write(0);
+    int newStringsOff = 28 + nstrings.size() * 4;
+    int newPoolSize = newStringsOff + dataOut.size();
+    ByteArrayOutputStream poolOut = new ByteArrayOutputStream();
+    writeLe16(poolOut, 0x0001); writeLe16(poolOut, 28); writeLe32(poolOut, newPoolSize);
+    writeLe32(poolOut, nstrings.size()); writeLe32(poolOut, 0); writeLe32(poolOut, 0);
+    writeLe32(poolOut, newStringsOff); writeLe32(poolOut, 0);
+    for (int off : newOffsets) writeLe32(poolOut, off);
+    poolOut.write(dataOut.toByteArray());
+    // Rebuild the file: original 8-byte file header, then the new
+    // pool, then everything after the old pool. Omitting the header
+    // would shift every later chunk by 8 bytes and break the file.
+    ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+    fileOut.write(orig, 0, 8);
+    fileOut.write(poolOut.toByteArray());
+    fileOut.write(orig, poolOff + poolSize, orig.length - (poolOff + poolSize));
+    byte[] rebuilt = fileOut.toByteArray();
+    putLe32(rebuilt, 4, rebuilt.length);
+    // Walk the XML chunks and change the package, label, permission and authority.
+    boolean foundPkg = false, foundLabel = false;
+    int off = 8 + poolOut.size();
+    while (off + 8 <= rebuilt.length) {
+      int type = readU16(rebuilt, off);
+      int chunkSize = readLe32(rebuilt, off + 4);
+      if (chunkSize <= 0 || off + chunkSize > rebuilt.length) break;
+      if (type == 0x0102) {
+        int nameIdx = readLe32(rebuilt, off + 20);
+        String elem = (nameIdx >= 0 && nameIdx < nstrings.size()) ? nstrings.get(nameIdx) : "";
+        int attrStart = readU16(rebuilt, off + 24);
+        int attrSize = readU16(rebuilt, off + 26);
+        int attrCount = readU16(rebuilt, off + 28);
+        int attrsBase = off + 16 + attrStart;
+        for (int j = 0; j < attrCount; j++) {
+          int aOff = attrsBase + j * attrSize;
+          if (aOff + 20 > rebuilt.length) break;
+          int aNameIdx = readLe32(rebuilt, aOff + 4);
+          String aName = (aNameIdx >= 0 && aNameIdx < nstrings.size()) ? nstrings.get(aNameIdx) : "";
+          int dataType = rebuilt[aOff + 12 + 3] & 0xff;
+          int dataVal = readLe32(rebuilt, aOff + 12 + 4);
+          if (elem.equals("manifest") && aName.equals("package")) { setStringAttr(rebuilt, aOff, newPkgIdx); foundPkg = true; }
+          else if (elem.equals("application") && aName.equals("label")) { setStringAttr(rebuilt, aOff, newLabelIdx); foundLabel = true; }
+          else if ((elem.equals("permission") || elem.equals("uses-permission")) && aName.equals("name") && dataType == 3 && oldPermIdx >= 0 && dataVal == oldPermIdx) setStringAttr(rebuilt, aOff, newPermIdx);
+          else if (elem.equals("provider") && aName.equals("authorities") && dataType == 3 && oldAuthIdx >= 0 && dataVal == oldAuthIdx) setStringAttr(rebuilt, aOff, newAuthIdx);
+        }
+      }
+      off += chunkSize;
+    }
+    if (!foundPkg) throw new Exception("Manifest package attribute not found");
+    if (!foundLabel) throw new Exception("Application label attribute not found");
+    return rebuilt;
+  }
+  static String replaceConfig(String json, String oldPkg, String newPkg, String oldName, String newLabel) {
+    if (json == null) return json;
+    String out = json.replace(oldPkg, newPkg);
+    // Only the app-name field, not every occurrence of the words.
+    String esc = newLabel.replace("\\", "\\\\").replace("\"", "\\\"");
+    out = out.replace("\"name\": \"" + oldName + "\"", "\"name\": \"" + esc + "\"");
+    return out;
+  }
+
   public static String build(Context ctx, String html, String rawName) {
+    return build2(ctx, html, rawName, "");
+  }
+
+  public static String build2(Context ctx, String html, String appName, String pkgInput) {
+    try {
+      String label = cleanAppName(appName);
+      String origPkg = ctx.getPackageName();
+      if (origPkg == null || origPkg.isEmpty()) return "error: Own package not found.";
+      String newPkg = cleanPackage(pkgInput, label);
+      if (newPkg == null) return "error: Package name must look like com.example.myapp, lower-case letters, digits and _ only, at least two parts.";
+      if (newPkg.equals(origPkg)) return "error: Choose a different app name or package. That package is Shell Packager itself, so the output could not be installed next to it.";
+      String fileName = cleanFileName(label);
+      return buildRenamed(ctx, html, label, origPkg, newPkg, fileName);
+    } catch (Exception e) {
+      return "error: " + e.getMessage();
+    }
+  }
+
+  static String buildRenamed(Context ctx, String html, String label, String origPkg, String newPkg, String fileName) {
     try {
       if (html == null || html.trim().isEmpty()) return "error: Paste or choose HTML first.";
-      String fileName = cleanFileName(rawName);
       byte[] newHtml = html.getBytes("UTF-8");
       String source = ctx.getApplicationInfo().sourceDir;
       if (source == null) return "error: Own APK path not found.";
 
-      // 1. Rewrite the ZIP, replacing only assets/www/index.html, and
-      //    dropping old v1 signature files. No other entry is changed.
+      // 1. Rewrite the ZIP: replace assets/www/index.html, rewrite
+      //    AndroidManifest.xml (v2 renaming) and assets/config.json,
+      //    and drop old v1 signature files. No other entry is changed.
       ByteArrayOutputStream unsignedOut = new ByteArrayOutputStream();
       ZipOutputStream zos = new ZipOutputStream(unsignedOut);
       ZipFile zip = new ZipFile(source);
@@ -233,7 +441,11 @@ public class ApkPackager {
           String name = e.getName();
           if (name.endsWith("/")) continue;
           if (isOldSignatureFile(name)) continue;
-          byte[] data = TARGET_ENTRY.equals(name) ? newHtml : readAll(zip.getInputStream(e));
+          byte[] data;
+          if (TARGET_ENTRY.equals(name)) data = newHtml;
+          else if (name.equals("AndroidManifest.xml")) data = renameManifest(readAll(zip.getInputStream(e)), origPkg, newPkg, label);
+          else if (name.equals("assets/config.json")) data = replaceConfig(new String(readAll(zip.getInputStream(e)), "UTF-8"), origPkg, newPkg, "Shell Packager", label).getBytes("UTF-8");
+          else data = readAll(zip.getInputStream(e));
           ZipEntry out = new ZipEntry(name);
           if (e.getTime() > 0) out.setTime(e.getTime());
           if (e.getMethod() == ZipEntry.STORED) {
