@@ -362,6 +362,13 @@ public class MainActivity extends AppCompatActivity {
         return fl.getPath();
       } catch (Exception e) { return "error: " + e.getMessage(); }
     }
+    @JavascriptInterface public String buildStandalone(String html, String name) {
+      if (!f.optBoolean("files")) return "disabled";
+      return ApkPackager.build(MainActivity.this, html, name);
+    }
+    @JavascriptInterface public String openStandalone() {
+      return ApkPackager.openLast(MainActivity.this);
+    }
     @JavascriptInterface public boolean isOnline() { return f.optBoolean("info") && online(); }
     @JavascriptInterface public String appVersion() { return f.optBoolean("info") ? root.optJSONObject("app").optString("vn") : ""; }
   }
