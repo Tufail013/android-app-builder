@@ -95,9 +95,28 @@ import javax.security.auth.x500.X500Principal;
  *  - This code has NOT been compiled on this machine (no Java here)
  *    and NOT been run on a phone yet. A real phone install test is
  *    still required before anyone is told v2 renaming works.
+ *
+ * App Cloner v1 (added on top of v2, same file, same signing code):
+ * cloneApk() clones a template-built APK file the user already has
+ * in Downloads. It does NOT copy a logged-in account, it does NOT
+ * rename dex class names, and it does NOT rebuild resources.arsc,
+ * so the clone keeps the original app's icon in v1. It only renames
+ * the manifest package / label / permission / authority with the
+ * same renameManifest() logic as v2, replaces assets/config.json
+ * package/name only if that file exists, drops old v1 signature
+ * files, and re-signs v2-only with a separate AndroidKeyStore key
+ * (alias "appcloner_signer", CN=App Cloner). It is honest about
+ * its scope: it works best for the user's own template-built apps
+ * (fully-qualified components, like Shell Packager outputs). Big
+ * apps that check their own signature (Gmail, WhatsApp, banking)
+ * will refuse or crash after any re-signing, and a clone always
+ * starts fresh — it never carries over a login. Do not use this
+ * to clone Muse accounts or any signature-checking app.
  */
 public class ApkPackager {
   static final String KEY_ALIAS = "shellpackager_signer";
+  static final String CLONE_KEY_ALIAS = "appcloner_signer";
+  static final String CLONE_CERT_CN = "CN=App Cloner";
   static final int SIG_ALG_RSA_PKCS1_SHA256 = 0x0103;
   static final int V2_BLOCK_ID = 0x7109871a;
   static final int CHUNK = 1024 * 1024;
@@ -163,20 +182,26 @@ public class ApkPackager {
     PrivateKey priv; byte[] cert; byte[] pub;
   }
   static KeyAndCert getKey(Context ctx) throws Exception {
+    return getKeyFor(ctx, KEY_ALIAS, "CN=Shell Packager");
+  }
+  // Reusable key helper: same AndroidKeyStore pattern, different
+  // alias / subject for the cloner, so packager and cloner outputs
+  // are signed by different keys and cannot update each other.
+  static KeyAndCert getKeyFor(Context ctx, String alias, String certCn) throws Exception {
     KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
     ks.load(null);
-    if (!ks.containsAlias(KEY_ALIAS)) {
+    if (!ks.containsAlias(alias)) {
       Calendar start = Calendar.getInstance();
       Calendar end = Calendar.getInstance();
       end.add(Calendar.YEAR, 25);
       KeyPairGenerator gen = KeyPairGenerator.getInstance(
           KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
-      KeyGenParameterSpec spec = new KeyGenParameterSpec.Builder(KEY_ALIAS,
+      KeyGenParameterSpec spec = new KeyGenParameterSpec.Builder(alias,
           KeyProperties.PURPOSE_SIGN)
           .setKeySize(2048)
           .setDigests(KeyProperties.DIGEST_SHA256)
           .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
-          .setCertificateSubject(new X500Principal("CN=Shell Packager"))
+          .setCertificateSubject(new X500Principal(certCn))
           .setCertificateSerialNumber(BigInteger.ONE)
           .setCertificateNotBefore(start.getTime())
           .setCertificateNotAfter(end.getTime())
@@ -186,9 +211,9 @@ public class ApkPackager {
       gen.generateKeyPair();
     }
     KeyAndCert kc = new KeyAndCert();
-    kc.priv = (PrivateKey) ks.getKey(KEY_ALIAS, null);
-    Certificate cert = ks.getCertificate(KEY_ALIAS);
-    if (kc.priv == null || cert == null) throw new Exception("packager signing key not available");
+    kc.priv = (PrivateKey) ks.getKey(alias, null);
+    Certificate cert = ks.getCertificate(alias);
+    if (kc.priv == null || cert == null) throw new Exception("signing key not available");
     kc.cert = cert.getEncoded();
     kc.pub = cert.getPublicKey().getEncoded();
     return kc;
@@ -402,6 +427,125 @@ public class ApkPackager {
     return out;
   }
 
+  // ---- App Cloner v1: parse the original package from a binary manifest ----
+  static String parseManifestPackage(byte[] orig) throws Exception {
+    if (orig.length < 8 || orig[0] != 0x03 || orig[1] != 0x00 || orig[2] != 0x08 || orig[3] != 0x00)
+      throw new Exception("AndroidManifest.xml is not a binary manifest");
+    int poolOff = 8;
+    if (readU16(orig, poolOff) != 0x0001) throw new Exception("AndroidManifest.xml has no string pool");
+    int poolHeaderSize = readU16(orig, poolOff + 2);
+    int poolSize = readLe32(orig, poolOff + 4);
+    int count = readLe32(orig, poolOff + 8);
+    int styleCount = readLe32(orig, poolOff + 12);
+    int flags = readLe32(orig, poolOff + 16);
+    int stringsOff = readLe32(orig, poolOff + 20);
+    if (poolHeaderSize != 28) throw new Exception("Unexpected manifest string-pool header");
+    if (styleCount != 0) throw new Exception("Manifest string pool has styles, renaming does not support it");
+    if ((flags & 0x100) != 0) throw new Exception("Manifest string pool is UTF-8, renaming supports UTF-16 only");
+    if (poolOff + poolSize > orig.length) throw new Exception("Manifest string pool runs past the file");
+    List<String> strings = new ArrayList<String>();
+    for (int i = 0; i < count; i++) {
+      int strOff = readLe32(orig, poolOff + 28 + i * 4);
+      int pos = poolOff + stringsOff + strOff;
+      int len = readU16(orig, pos); pos += 2;
+      if ((len & 0x8000) != 0) { len = ((len & 0x7fff) << 16) | readU16(orig, pos); pos += 2; }
+      StringBuilder sb = new StringBuilder();
+      for (int j = 0; j < len; j++) sb.append((char) readU16(orig, pos + j * 2));
+      strings.add(sb.toString());
+    }
+    int off = 8 + poolSize;
+    while (off + 8 <= orig.length) {
+      int type = readU16(orig, off);
+      int chunkSize = readLe32(orig, off + 4);
+      if (chunkSize <= 0 || off + chunkSize > orig.length) break;
+      if (type == 0x0102) {
+        int nameIdx = readLe32(orig, off + 20);
+        String elem = (nameIdx >= 0 && nameIdx < strings.size()) ? strings.get(nameIdx) : "";
+        if (elem.equals("manifest")) {
+          int attrStart = readU16(orig, off + 24);
+          int attrSize = readU16(orig, off + 26);
+          int attrCount = readU16(orig, off + 28);
+          int attrsBase = off + 16 + attrStart;
+          for (int j = 0; j < attrCount; j++) {
+            int aOff = attrsBase + j * attrSize;
+            if (aOff + 20 > orig.length) break;
+            int aNameIdx = readLe32(orig, aOff + 4);
+            String aName = (aNameIdx >= 0 && aNameIdx < strings.size()) ? strings.get(aNameIdx) : "";
+            if (!aName.equals("package")) continue;
+            int dataType = orig[aOff + 12 + 3] & 0xff;
+            int dataVal = readLe32(orig, aOff + 12 + 4);
+            int rawVal = readLe32(orig, aOff + 8);
+            int idx = (dataType == 3) ? dataVal : rawVal;
+            if (idx >= 0 && idx < strings.size()) return strings.get(idx);
+            throw new Exception("Manifest package attribute not found");
+          }
+        }
+      }
+      off += chunkSize;
+    }
+    throw new Exception("Manifest package attribute not found");
+  }
+
+  // Replace only the "name" field in assets/config.json, if present.
+  // Unlike replaceConfig() (which knows the old packager name), the
+  // clone does not know the source app's old name, so it finds the
+  // first "name": "..." value instead of matching an exact old name.
+  static String replaceConfigName(String json, String newLabel) {
+    if (json == null) return json;
+    int key = json.indexOf("\"name\"");
+    if (key < 0) return json;
+    int colon = json.indexOf(':', key + 6);
+    if (colon < 0) return json;
+    int open = json.indexOf('"', colon + 1);
+    if (open < 0) return json;
+    int close = json.indexOf('"', open + 1);
+    if (close < 0) return json;
+    String esc = newLabel.replace("\\", "\\\\").replace("\"", "\\\"");
+    return json.substring(0, open + 1) + esc + json.substring(close);
+  }
+
+  // Find a source APK file by name in Downloads. MediaStore is the
+  // normal path on Android 10+; the app's own Downloads folder is
+  // only a fallback. Returns a readable File, or null.
+  static File findSourceApk(Context ctx, String fileName) {
+    if (Build.VERSION.SDK_INT >= 29) {
+      try {
+        String[] proj = new String[] { MediaStore.Downloads._ID };
+        android.database.Cursor cur = ctx.getContentResolver().query(
+            MediaStore.Downloads.EXTERNAL_CONTENT_URI, proj,
+            MediaStore.Downloads.DISPLAY_NAME + "=?", new String[] { fileName }, null);
+        if (cur != null) {
+          try {
+            if (cur.moveToFirst()) {
+              long id = cur.getLong(0);
+              Uri uri = android.content.ContentUris.withAppendedId(
+                  MediaStore.Downloads.EXTERNAL_CONTENT_URI, id);
+              InputStream in = ctx.getContentResolver().openInputStream(uri);
+              if (in != null) {
+                File tmp = new File(ctx.getCacheDir(), "clone_src.apk");
+                FileOutputStream os = new FileOutputStream(tmp);
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = in.read(buf)) > 0) os.write(buf, 0, n);
+                os.close();
+                in.close();
+                return tmp;
+              }
+            }
+          } finally { cur.close(); }
+        }
+      } catch (Exception e) { /* fall through to the folder fallback */ }
+    }
+    try {
+      File dir = ctx.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+      if (dir != null) {
+        File f = new File(dir, fileName);
+        if (f.isFile() && f.canRead()) return f;
+      }
+    } catch (Exception e) { }
+    return null;
+  }
+
   public static String build(Context ctx, String html, String rawName) {
     return build2(ctx, html, rawName, "");
   }
@@ -421,56 +565,14 @@ public class ApkPackager {
     }
   }
 
-  static String buildRenamed(Context ctx, String html, String label, String origPkg, String newPkg, String fileName) {
-    try {
-      if (html == null || html.trim().isEmpty()) return "error: Paste or choose HTML first.";
-      byte[] newHtml = html.getBytes("UTF-8");
-      String source = ctx.getApplicationInfo().sourceDir;
-      if (source == null) return "error: Own APK path not found.";
-
-      // 1. Rewrite the ZIP: replace assets/www/index.html, rewrite
-      //    AndroidManifest.xml (v2 renaming) and assets/config.json,
-      //    and drop old v1 signature files. No other entry is changed.
-      ByteArrayOutputStream unsignedOut = new ByteArrayOutputStream();
-      ZipOutputStream zos = new ZipOutputStream(unsignedOut);
-      ZipFile zip = new ZipFile(source);
-      try {
-        Enumeration<? extends ZipEntry> en = zip.entries();
-        while (en.hasMoreElements()) {
-          ZipEntry e = en.nextElement();
-          String name = e.getName();
-          if (name.endsWith("/")) continue;
-          if (isOldSignatureFile(name)) continue;
-          byte[] data;
-          if (TARGET_ENTRY.equals(name)) data = newHtml;
-          else if (name.equals("AndroidManifest.xml")) data = renameManifest(readAll(zip.getInputStream(e)), origPkg, newPkg, label);
-          else if (name.equals("assets/config.json")) data = replaceConfig(new String(readAll(zip.getInputStream(e)), "UTF-8"), origPkg, newPkg, "Shell Packager", label).getBytes("UTF-8");
-          else data = readAll(zip.getInputStream(e));
-          ZipEntry out = new ZipEntry(name);
-          if (e.getTime() > 0) out.setTime(e.getTime());
-          if (e.getMethod() == ZipEntry.STORED) {
-            CRC32 crc = new CRC32();
-            crc.update(data);
-            out.setMethod(ZipEntry.STORED);
-            out.setSize(data.length);
-            out.setCompressedSize(data.length);
-            out.setCrc(crc.getValue());
-          } else {
-            out.setMethod(ZipEntry.DEFLATED);
-          }
-          zos.putNextEntry(out);
-          zos.write(data);
-          zos.closeEntry();
-        }
-      } finally {
-        zos.close();
-        zip.close();
-      }
-      byte[] unsigned = unsignedOut.toByteArray();
-
+  // ---- Reusable v2 signing + saving (used by both packager and cloner) ----
+  // Takes an unsigned ZIP, signs it v2-only, saves it to Downloads,
+  // remembers its Uri under prefsName, and returns ok|where|uri.
+  static String signAndSave(Context ctx, byte[] unsigned, String fileName,
+      String keyAlias, String certCn, String prefsName) throws Exception {
       // 2. Split the unsigned ZIP into sections 1, 3 and 4.
       int eocd = findEocd(unsigned);
-      if (eocd < 0) return "error: Could not find the ZIP directory in the shell APK.";
+      if (eocd < 0) return "error: Could not find the ZIP directory in the APK.";
       int cdSize = readLe32(unsigned, eocd + 12);
       int cdOffset = readLe32(unsigned, eocd + 16);
       if (cdOffset < 0 || cdOffset + cdSize > unsigned.length) return "error: Bad ZIP directory in the shell APK.";
@@ -482,7 +584,7 @@ public class ApkPackager {
       System.arraycopy(unsigned, cdOffset + cdSize, s4, 0, s4.length);
 
       // 3. v2 signing block.
-      KeyAndCert kc = getKey(ctx);
+      KeyAndCert kc = getKeyFor(ctx, keyAlias, certCn);
       // For the digest, the EOCD's Central Directory offset is treated as
       // the signing-block offset, which is exactly s1.length here.
       byte[] s4ForDigest = s4.clone();
@@ -550,23 +652,169 @@ public class ApkPackager {
         os.close();
         savedWhere = outFile.getPath() + " (app folder, not shared Downloads)";
       }
-      SharedPreferences prefs = ctx.getSharedPreferences("packager", 0);
+      SharedPreferences prefs = ctx.getSharedPreferences(prefsName, 0);
       SharedPreferences.Editor ed = prefs.edit();
       ed.putString("last_name", fileName);
       if (savedUri != null) ed.putString("last_uri", savedUri.toString());
       else ed.remove("last_uri");
       ed.apply();
       return "ok|" + savedWhere + "|" + (savedUri != null ? savedUri.toString() : "");
+  }
+
+  static String buildRenamed(Context ctx, String html, String label, String origPkg, String newPkg, String fileName) {
+    try {
+      if (html == null || html.trim().isEmpty()) return "error: Paste or choose HTML first.";
+      byte[] newHtml = html.getBytes("UTF-8");
+      String source = ctx.getApplicationInfo().sourceDir;
+      if (source == null) return "error: Own APK path not found.";
+
+      // 1. Rewrite the ZIP: replace assets/www/index.html, rewrite
+      //    AndroidManifest.xml (v2 renaming) and assets/config.json,
+      //    and drop old v1 signature files. No other entry is changed.
+      ByteArrayOutputStream unsignedOut = new ByteArrayOutputStream();
+      ZipOutputStream zos = new ZipOutputStream(unsignedOut);
+      ZipFile zip = new ZipFile(source);
+      try {
+        Enumeration<? extends ZipEntry> en = zip.entries();
+        while (en.hasMoreElements()) {
+          ZipEntry e = en.nextElement();
+          String name = e.getName();
+          if (name.endsWith("/")) continue;
+          if (isOldSignatureFile(name)) continue;
+          byte[] data;
+          if (TARGET_ENTRY.equals(name)) data = newHtml;
+          else if (name.equals("AndroidManifest.xml")) data = renameManifest(readAll(zip.getInputStream(e)), origPkg, newPkg, label);
+          else if (name.equals("assets/config.json")) data = replaceConfig(new String(readAll(zip.getInputStream(e)), "UTF-8"), origPkg, newPkg, "Shell Packager", label).getBytes("UTF-8");
+          else data = readAll(zip.getInputStream(e));
+          ZipEntry out = new ZipEntry(name);
+          if (e.getTime() > 0) out.setTime(e.getTime());
+          if (e.getMethod() == ZipEntry.STORED) {
+            CRC32 crc = new CRC32();
+            crc.update(data);
+            out.setMethod(ZipEntry.STORED);
+            out.setSize(data.length);
+            out.setCompressedSize(data.length);
+            out.setCrc(crc.getValue());
+          } else {
+            out.setMethod(ZipEntry.DEFLATED);
+          }
+          zos.putNextEntry(out);
+          zos.write(data);
+          zos.closeEntry();
+        }
+      } finally {
+        zos.close();
+        zip.close();
+      }
+      byte[] unsigned = unsignedOut.toByteArray();
+
+      return signAndSave(ctx, unsigned, fileName, KEY_ALIAS, "CN=Shell Packager", "packager");
+    } catch (Exception e) {
+      return "error: " + e.getMessage();
+    }
+  }
+
+  // ---- App Cloner v1 ----
+  // Clone a template-built APK already in Downloads. The source APK
+  // itself is never changed; a new APK is written to Downloads.
+  // What changes: manifest package, label, permission, authority
+  // (same renameManifest() as v2), and assets/config.json package
+  // and name, only if that file exists. What does NOT change:
+  // assets/www/index.html (kept from the source), the icon,
+  // resources.arsc, dex class names, or versionCode. A clone
+  // therefore starts fresh and does NOT copy a logged-in account.
+  // Refuses: the cloner's own package, the source app's own
+  // package (a clone must differ, or it could not sit next to
+  // the original), a missing source file, and any manifest
+  // renameManifest() itself refuses (UTF-8 pool, styles).
+  public static String cloneApk(Context ctx, String sourceName, String appName, String pkgInput) {
+    try {
+      String label = cleanAppName(appName);
+      String clonerPkg = ctx.getPackageName();
+      if (clonerPkg == null || clonerPkg.isEmpty()) return "error: Own package not found.";
+      String newPkg = cleanPackage(pkgInput, label);
+      if (newPkg == null) return "error: Package name must look like com.example.myapp, lower-case letters, digits and _ only, at least two parts.";
+      if (newPkg.equals(clonerPkg)) return "error: Choose a different app name or package. That package is App Cloner itself, so the clone could not be installed next to it.";
+      String srcName = cleanFileName(sourceName);
+      File srcFile = findSourceApk(ctx, srcName);
+      if (srcFile == null) return "error: " + srcName + " not found in Downloads. Put that APK file in Downloads first, then try again.";
+      // Read the source manifest first, to learn its original package.
+      String oldPkg = null;
+      ZipFile probe = new ZipFile(srcFile);
+      try {
+        ZipEntry man = probe.getEntry("AndroidManifest.xml");
+        if (man == null) return "error: That APK has no AndroidManifest.xml, so it cannot be cloned.";
+        oldPkg = parseManifestPackage(readAll(probe.getInputStream(man)));
+      } finally { probe.close(); }
+      if (oldPkg == null || oldPkg.isEmpty()) return "error: Could not read the original package from that APK.";
+      if (newPkg.equals(oldPkg)) return "error: Choose a different app name or package. That package is the original app's package, so the clone could not be installed next to the original.";
+      String fileName = cleanFileName(label);
+      // Rewrite the ZIP: rename the manifest and config.json only.
+      // Every other entry, including assets/www/index.html and the
+      // icon, is copied unchanged. Old v1 signature files are dropped.
+      ByteArrayOutputStream unsignedOut = new ByteArrayOutputStream();
+      ZipOutputStream zos = new ZipOutputStream(unsignedOut);
+      ZipFile zip = new ZipFile(srcFile);
+      try {
+        Enumeration<? extends ZipEntry> en = zip.entries();
+        while (en.hasMoreElements()) {
+          ZipEntry e = en.nextElement();
+          String name = e.getName();
+          if (name.endsWith("/")) continue;
+          if (isOldSignatureFile(name)) continue;
+          byte[] data;
+          if (name.equals("AndroidManifest.xml")) data = renameManifest(readAll(zip.getInputStream(e)), oldPkg, newPkg, label);
+          else if (name.equals("assets/config.json")) {
+            String cfg = new String(readAll(zip.getInputStream(e)), "UTF-8");
+            cfg = cfg.replace(oldPkg, newPkg);
+            cfg = replaceConfigName(cfg, label);
+            data = cfg.getBytes("UTF-8");
+          } else data = readAll(zip.getInputStream(e));
+          ZipEntry out = new ZipEntry(name);
+          if (e.getTime() > 0) out.setTime(e.getTime());
+          if (e.getMethod() == ZipEntry.STORED) {
+            CRC32 crc = new CRC32();
+            crc.update(data);
+            out.setMethod(ZipEntry.STORED);
+            out.setSize(data.length);
+            out.setCompressedSize(data.length);
+            out.setCrc(crc.getValue());
+          } else {
+            out.setMethod(ZipEntry.DEFLATED);
+          }
+          zos.putNextEntry(out);
+          zos.write(data);
+          zos.closeEntry();
+        }
+      } finally {
+        zos.close();
+        zip.close();
+      }
+      byte[] unsigned = unsignedOut.toByteArray();
+      // Delete the MediaStore temp copy, if one was made; the app's
+      // own Downloads-folder file is the user's file, so leave it.
+      try {
+        if (srcFile.getParentFile() != null && srcFile.getParentFile().equals(ctx.getCacheDir())) srcFile.delete();
+      } catch (Exception e) { }
+      return signAndSave(ctx, unsigned, fileName, CLONE_KEY_ALIAS, CLONE_CERT_CN, "cloner");
     } catch (Exception e) {
       return "error: " + e.getMessage();
     }
   }
 
   public static String openLast(Context ctx) {
+    return openFor(ctx, "packager", "No standalone APK saved yet. Build one first.");
+  }
+
+  public static String openClone(Context ctx) {
+    return openFor(ctx, "cloner", "No clone saved yet. Build a clone first.");
+  }
+
+  static String openFor(Context ctx, String prefsName, String emptyMsg) {
     try {
-      SharedPreferences prefs = ctx.getSharedPreferences("packager", 0);
+      SharedPreferences prefs = ctx.getSharedPreferences(prefsName, 0);
       String uriStr = prefs.getString("last_uri", null);
-      if (uriStr == null) return "error: No standalone APK saved yet. Build one first.";
+      if (uriStr == null) return "error: " + emptyMsg;
       Uri uri = Uri.parse(uriStr);
       Intent in = new Intent(Intent.ACTION_VIEW);
       in.setDataAndType(uri, "application/vnd.android.package-archive");
