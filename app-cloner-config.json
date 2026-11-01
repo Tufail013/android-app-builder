@@ -1,0 +1,84 @@
+{
+ "format": "hab-build-config-1",
+ "buildPerformed": false,
+ "config": {
+  "app": {
+   "name": "App Cloner",
+   "pkg": "com.example.appcloner",
+   "vc": "1",
+   "vn": "1.0.0",
+   "min": "24",
+   "target": "36",
+   "max": "",
+   "scheme": ""
+  },
+  "src": {
+   "type": "file",
+   "file": "index.html",
+   "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>App Cloner v1 - Clone Your Own Template App, On Phone</title>\n<style>\n*{box-sizing:border-box}\nbody{margin:0;font-family:system-ui,sans-serif;background:#e6e9ef;color:#111}\nbody.dark{background:#0a0a0a;color:#fff}\n.top{padding:18px;max-width:720px;margin:auto}\nh1{font-size:32px;line-height:1;margin:8px 0}\nh1 span{display:block;color:transparent;-webkit-text-stroke:2px #111}\nbody.dark h1 span{-webkit-text-stroke:2px #fff}\np{color:#555;line-height:1.6}\nbody.dark p{color:#aab4c5}\n.card{background:#e6e9ef;border-radius:24px;padding:20px;margin:16px 0;box-shadow:8px 8px 20px #c3c9d6,-8px -8px 20px #fff}\nbody.dark .card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(18px);box-shadow:none}\ninput{width:100%;padding:13px;border-radius:14px;border:1px solid #ccc;font-size:16px;margin:8px 0;background:#fff}\nbody.dark input{background:#222;color:#fff;border-color:#444}\nbutton{border:0;border-radius:16px;padding:13px 22px;font-size:16px;margin:6px 6px 6px 0;background:#fff;color:#111;cursor:pointer;font-weight:600;box-shadow:4px 4px 12px #c3c9d6,-4px -4px 12px #fff}\nbody.dark button{background:rgba(255,255,255,.12);color:#fff;box-shadow:none;border:1px solid rgba(255,255,255,.2)}\nbutton.black{background:#111;color:#fff}\nbody.dark button.black{background:#fff;color:#111}\nbutton:disabled{opacity:.5}\n#status{font-weight:600;white-space:pre-wrap}\n.track{width:110px;height:52px;border-radius:30px;background:#fff;box-shadow:inset 3px 3px 8px #c3c9d6;position:relative;cursor:pointer;display:inline-block}\nbody.dark .track{background:#222}\n.knob{position:absolute;top:6px;left:6px;width:40px;height:40px;border-radius:50%;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;transition:left .3s}\nbody.dark .knob{left:64px;background:#fff;color:#111}\n</style>\n</head>\n<body>\n<div class=\"top\">\n<h1>APP CLONER v1<br><span>CLONE YOUR OWN APP, ON PHONE</span></h1>\n<p><b>What this does, simply:</b> It takes an APK file you already have in Downloads, changes its home-screen name and package to yours, signs it again on the phone with APK Signature Scheme v2, and saves the clone in Downloads. No GitHub build is needed for that clone. The original APK is not changed.</p>\n<div class=\"card\">\n<b>Step 1 - APK file already in Downloads</b>\n<input id=\"sourceName\" placeholder=\"APK file name, for example MyApp.apk\" value=\"MyApp.apk\">\n<p style=\"margin:0\">Type only the file name, not a folder. The file must already be in Downloads, and it must be one of your own template-built apps, for example a Shell Packager output.</p>\n<b>Step 2 - New app name (this is the name on the home screen)</b>\n<input id=\"appName\" placeholder=\"New app name, for example MyApp Copy\" value=\"MyApp Copy\">\n<b>Step 3 - Package (optional, leave blank for automatic)</b>\n<input id=\"pkg\" placeholder=\"Leave blank, or type like com.example.myappcopy\">\n<p style=\"margin:0\">If you leave Step 3 blank, the package is made from your new app name, for example MyApp Copy becomes com.example.myappcopy. The file name also comes from your new app name.</p>\n<button class=\"black\" id=\"buildBtn\" onclick=\"buildClone()\">\ud83d\udce6 Build Clone</button>\n<button id=\"openBtn\" onclick=\"openClone()\" style=\"display:none\">\u25b6 Open / Install Saved Clone</button>\n<p id=\"status\"></p>\n</div>\n<div class=\"card\">\n<b>Please read this first, in v1:</b>\n<p>1. This works best for your own template-built apps, with fully-qualified components, like Shell Packager outputs.</p>\n<p>2. Big apps that check their own signature, like Gmail, WhatsApp, and banking apps, will refuse or crash after cloning. Do not try to clone Muse accounts, Gmail, WhatsApp, or banking apps.</p>\n<p>3. A clone starts fresh and does NOT copy a logged-in account. You will have to log in again in the clone, if that app asks for a login.</p>\n<p>4. The icon stays the original app's icon in v1. Only the name and package change, not the icon.</p>\n<p>5. Dex class names are not renamed in v1, and the clone keeps the original app's versionCode.</p>\n<p>6. If you type App Cloner's own package, or the original app's package, the build will refuse, because that clone could not be installed next to the original.</p>\n<p>Camera, location, microphone and maps are not added by cloning, and will not be faked.</p>\n</div>\n<div class=\"card\">\n<b>Dark / White</b>\n<div class=\"track\" onclick=\"document.body.classList.toggle('dark');document.getElementById('knob').textContent=document.body.classList.contains('dark')?'\u263e':'\u2600'\"><div class=\"knob\" id=\"knob\">\u2600</div></div>\n<p style=\"margin:8px 0 0\">This changes the cloner look only, not your cloned app.</p>\n</div>\n</div>\n<script>\nfunction setStatus(t){document.getElementById('status').textContent=t}\nfunction buildClone(){\n var s=document.getElementById('sourceName').value.trim();\n var a=document.getElementById('appName').value.trim();\n var pk=document.getElementById('pkg').value.trim();\n if(!s){setStatus('Type the APK file name in Downloads first.');return}\n if(!a){setStatus('Type a new app name first.');return}\n setStatus('Building clone... please wait, do not close the app. This can take a few seconds.');\n document.getElementById('buildBtn').disabled=true;\n setTimeout(function(){\n  try{\n   if(!window.Android || !Android.cloneApk){setStatus('Error: cloneApk is not available in this app. This HTML must run inside the App Cloner app, not a browser.');document.getElementById('buildBtn').disabled=false;return}\n   var r=Android.cloneApk(s,a,pk);\n   if(r.indexOf('ok|')===0){\n     var parts=r.split('|');\n     setStatus('Done. Saved to: '+parts[1]+'\\nNow tap Open / Install, or find the file in Downloads. You do NOT need to uninstall App Cloner first, because the clone has its own package and home name.');\n     document.getElementById('openBtn').style.display='inline-block';\n   } else {\n     setStatus('Build failed: '+r);\n   }\n  }catch(err){setStatus('Build failed: '+err)}\n  document.getElementById('buildBtn').disabled=false;\n },150);\n}\nfunction openClone(){\n try{\n  var r=Android.openClone();\n  setStatus(r==='ok' ? 'Installer should open now. If it asks, allow installing from this source once.' : 'Could not open: '+r);\n }catch(err){setStatus('Could not open: '+err)}\n}\n</script>\n</body>\n</html>\n"
+  },
+  "disp": {
+   "orient": "auto",
+   "status": true,
+   "action": false,
+   "keepOn": false,
+   "cutout": "default",
+   "desktop": false,
+   "wm": false,
+   "primary": "#22d3ee",
+   "loadBg": "#000000",
+   "statusColor": "#000000",
+   "navColor": "#000000",
+   "transp": false,
+   "tint": "auto"
+  },
+  "perms": [
+   "INTERNET"
+  ],
+  "icon": {
+   "name": "",
+   "data": ""
+  },
+  "splash": {
+   "on": true,
+   "bg": "#000000",
+   "style": "ring",
+   "loader": "#22d3ee",
+   "ring": "#333333",
+   "img": {
+    "name": "",
+    "data": ""
+   },
+   "iconSize": "96",
+   "radius": "20",
+   "loaderSize": "40",
+   "gap": "24",
+   "dur": "2000",
+   "thick": "4",
+   "fade": "300"
+  },
+  "wv": {
+   "js": true
+  },
+  "feat": {
+   "notify": true,
+   "reminders": false,
+   "vibrate": false,
+   "toast": true,
+   "share": false,
+   "files": true,
+   "tts": false,
+   "info": true,
+   "biometric": false,
+   "secure": false,
+   "fullscreen": false,
+   "anim": "slide"
+  },
+  "ads": {
+   "on": false
+  },
+  "out": {
+   "format": "apk"
+  }
+ }
+}
