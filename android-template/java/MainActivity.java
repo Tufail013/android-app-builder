@@ -373,6 +373,13 @@ public class MainActivity extends AppCompatActivity {
     @JavascriptInterface public String openStandalone() {
       return ApkPackager.openLast(MainActivity.this);
     }
+    @JavascriptInterface public String cloneApk(String sourceName, String appName, String pkg) {
+      if (!f.optBoolean("files")) return "disabled";
+      return ApkPackager.cloneApk(MainActivity.this, sourceName, appName, pkg);
+    }
+    @JavascriptInterface public String openClone() {
+      return ApkPackager.openClone(MainActivity.this);
+    }
     @JavascriptInterface public boolean isOnline() { return f.optBoolean("info") && online(); }
     @JavascriptInterface public String appVersion() { return f.optBoolean("info") ? root.optJSONObject("app").optString("vn") : ""; }
   }
