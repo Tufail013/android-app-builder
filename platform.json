@@ -16,6 +16,6 @@
     "webkit": "androidx.webkit:webkit:1.14.0",
     "biometric": "androidx.biometric:biometric:1.1.0"
   },
-  "baseDeps": ["appcompat", "core", "activity", "swiperefresh", "webkit", "biometric"],
-  "notes": "Change compileSdk/targetSdk/agp/gradle here when Google Play raises the target level. AGP 8.13 supports up to API 36. biometric stays in baseDeps until per-capability Java modules arrive (phase 3)."
+  "baseDeps": ["appcompat", "core", "activity", "swiperefresh", "webkit"],
+  "notes": "Change compileSdk/targetSdk/agp/gradle here when Google Play raises the target level. AGP 8.13 supports up to API 36. Biometric was removed from baseDeps in v1.0.4: the lock feature is off, and its library manifest added USE_BIOMETRIC / USE_FINGERPRINT permissions the app does not need."
 }
