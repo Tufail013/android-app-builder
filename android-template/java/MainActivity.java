@@ -356,6 +356,10 @@ public class MainActivity extends AppCompatActivity {
     } catch (Exception e) { return false; }
   }
 
+  // TA SERIES: home back shows a toast — "Press back again to exit".
+  // Press twice within 2 seconds to exit. No dialog on Home.
+  long lastBackPress = 0;
+
   void handleBack() {
     // 1. Let the current page handle back first: a quiz goes up one screen
     // (and asks before leaving a running test), the website goes up one
@@ -364,9 +368,13 @@ public class MainActivity extends AppCompatActivity {
       if ("true".equals(handled)) return;
       // 2. Otherwise use WebView history.
       if (w.optBoolean("backNav", true) && web.canGoBack()) { web.goBack(); return; }
-      // 3. Root: ask before exiting.
+      // 3. Root: toast "Press back again to exit" — press twice within
+      // 2 seconds to exit. No dialog on Home.
       if (w.optBoolean("exitConfirm", true)) {
-        new AlertDialog.Builder(MainActivity.this).setMessage("Exit app?").setPositiveButton("Exit", (x, y) -> finish()).setNegativeButton("Stay", null).show();
+        long now = System.currentTimeMillis();
+        if (now - lastBackPress < 2000) { finish(); return; }
+        lastBackPress = now;
+        Toast.makeText(MainActivity.this, "Press back again to exit", Toast.LENGTH_SHORT).show();
         return;
       }
       finish();
