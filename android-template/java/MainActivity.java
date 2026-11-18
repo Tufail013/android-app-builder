@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
   static final String CH = "app_channel";
   JSONObject root, d, w, f, sp;
   WebView web;
+  WebView popup;
   SwipeRefreshLayout swipe;
   ProgressBar bar;
   FrameLayout main;
@@ -178,6 +179,13 @@ public class MainActivity extends AppCompatActivity {
       @Override public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) {
         if (r.isForMainFrame() && w.optBoolean("noNet", true) && !online()) showNoNet();
       }
+      @Override public boolean onRenderProcessGone(WebView v, RenderProcessGoneDetail detail) {
+        // If the WebView's renderer dies the page goes blank white. Reload the
+        // home screen instead of leaving a dead white page.
+        Toast.makeText(MainActivity.this, "Page had a problem — reloading.", Toast.LENGTH_SHORT).show();
+        v.loadUrl("https://" + HOST + "/assets/www/index.html");
+        return true;
+      }
     });
     web.setWebChromeClient(new WebChromeClient() {
       @Override public void onProgressChanged(WebView v, int p) {
@@ -200,18 +208,44 @@ public class MainActivity extends AppCompatActivity {
       }
       @Override public boolean onCreateWindow(WebView v, boolean isDialog, boolean isUserGesture, Message resultMsg) {
         // The TA SERIES site opens file links with target="_blank". Without this,
-        // those taps do nothing in a WebView. Load them in this same WebView so
-        // shouldOverrideUrlLoading still decides in-app vs browser.
-        WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
-        transport.setWebView(v);
-        resultMsg.sendToTarget();
-        return true;
+        // those taps do nothing in a WebView. The popup URL is caught here and
+        // loaded into the main WebView instead, so shouldOverrideUrlLoading still
+        // decides in-app vs browser. A separate hidden popup WebView is used:
+        // reusing the main WebView as the popup target crashed the app on some
+        // phones ("TA SERIES has stopped" when tapping a file to download).
+        try {
+          if (popup == null) {
+            popup = new WebView(MainActivity.this);
+            popup.setWebViewClient(new WebViewClient() {
+              @Override public boolean shouldOverrideUrlLoading(WebView pv, WebResourceRequest r) {
+                web.loadUrl(r.getUrl().toString());
+                return true;
+              }
+              @Override public void onPageStarted(WebView pv, String url, Bitmap fav) {
+                // Fallback if the popup's first URL was not intercepted above.
+                if (url != null && url.startsWith("http")) { web.loadUrl(url); pv.stopLoading(); }
+              }
+            });
+          }
+          WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+          transport.setWebView(popup);
+          resultMsg.sendToTarget();
+          return true;
+        } catch (Exception e) {
+          return false;
+        }
       }
     });
     // In-app downloads: a tap on a Drive download link saves the file to the
     // phone's Downloads folder with a notification, instead of opening Chrome.
     web.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
       try {
+        // DownloadManager only handles http/https links. Anything else (for
+        // example a blob: link from Drive) cannot be saved this way.
+        if (url == null || !(url.startsWith("http://") || url.startsWith("https://"))) {
+          Toast.makeText(MainActivity.this, "Download failed. Open the link in your browser to download it.", Toast.LENGTH_LONG).show();
+          return;
+        }
         DownloadManager.Request req = new DownloadManager.Request(Uri.parse(url));
         req.setMimeType(mimetype);
         String name = URLUtil.guessFileName(url, contentDisposition, mimetype);
@@ -305,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
     super.onActivityResult(rq, rs, it);
     if (rq == 77 && chooser != null) { chooser.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(rs, it)); chooser = null; }
   }
-  @Override protected void onDestroy() { if (tts != null) tts.shutdown(); super.onDestroy(); }
+  @Override protected void onDestroy() { if (tts != null) tts.shutdown(); if (popup != null) popup.destroy(); super.onDestroy(); }
 
   static void show(Context c, String t, String m) {
     NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
