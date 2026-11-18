@@ -66,7 +66,14 @@ def generate(norm, res, reg, plat, out, template_dir, extra_perms_ok=True):
     # ---- manifest ----
     manual = [x for x in c.get('perms', []) if isinstance(x, str) and PERM.fullmatch(x)]
     perms = sorted({p['name'] for p in res['permissions']} | set(manual))
-    permx = ''.join('  <uses-permission android:name="android.permission.%s"/>\n' % x for x in perms)
+    # WRITE_EXTERNAL_STORAGE is only needed on Android 9 and older: on Android
+    # 10+ DownloadManager writes to the shared Downloads folder without it.
+    # Cap it so newer phones never see the permission at all.
+    def perm_line(x):
+        if x == 'WRITE_EXTERNAL_STORAGE':
+            return '  <uses-permission android:name="android.permission.%s" android:maxSdkVersion="28"/>\n' % x
+        return '  <uses-permission android:name="android.permission.%s"/>\n' % x
+    permx = ''.join(perm_line(x) for x in perms)
     rec = ''
     for r in res['receivers']:
         acts = ''.join('<action android:name="%s"/>' % escape(x) for x in r.get('actions', []))
