@@ -3,55 +3,60 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TA SERIES — You're offline</title>
+<title>You&rsquo;re offline — TA SERIES</title>
+<link rel="stylesheet" href="ta.css">
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#F7FAFF;color:#101D3A}
-.wrap{max-width:720px;margin:0 auto;padding:32px 16px;text-align:center}
-.mark{width:64px;height:64px;border-radius:18px;background:#7A1233;color:#fff;display:grid;place-items:center;font-weight:800;font-size:26px;margin:24px auto 16px}
-h1{font-size:24px;margin:0 0 8px}
-h1 span{color:#7A1233}
-p{color:#53627D;font-size:15px;line-height:1.6;margin:0 0 24px}
-.card{background:#fff;border:1px solid #DCE4F2;border-radius:18px;padding:20px;margin:14px 0;text-align:left}
-.card h2{margin:0 0 6px;font-size:17px}
-.card p{margin:0 0 14px;font-size:14px}
-.btn{display:block;width:100%;text-align:center;text-decoration:none;border-radius:14px;padding:14px;font-size:16px;font-weight:700}
-.btn-burg{background:#7A1233;color:#fff}
-.btn-ghost{background:#EEF4FF;color:#101D3A;margin-top:8px}
-.quiz{display:flex;align-items:center;gap:12px;background:#F7FAFF;border:1px solid #DCE4F2;border-radius:14px;padding:12px;margin-top:10px;text-decoration:none;color:#101D3A}
-.quiz .ico{width:40px;height:40px;border-radius:10px;background:#101D3A;color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
-.quiz b{display:block;font-size:15px}
-.quiz span{font-size:12px;color:#53627D}
-.quiz .go{margin-left:auto;color:#7A1233;font-weight:800;font-size:20px}
-.foot{text-align:center;color:#53627D;font-size:12px;line-height:1.7;margin-top:24px}
+body{background:#0B0B0C;color:#FFFFFF}
+.off-wrap{max-width:480px;margin:0 auto;padding:0 16px 40px;text-align:center}
+.off-hero{background:#0B0B0C;color:#fff;padding:44px 20px 60px}
+.off-hero h1{font-size:28px;font-weight:800;margin-top:14px;color:#fff}
+.off-hero h1 .lime{color:#C6F432}
+.off-hero p{font-size:14.5px;color:rgba(255,255,255,.75);line-height:1.65;margin:10px auto 0;max-width:320px}
+.off-ic{width:72px;height:72px;margin:0 auto;border-radius:20px;background:#C6F432;display:grid;place-items:center}
+.off-ic svg{width:36px;height:36px;color:#0B0B0C}
+.off-card{background:#17171A;border:1px solid rgba(255,255,255,.14);border-radius:22px;box-shadow:0 10px 28px rgba(0,0,0,.45);padding:20px;margin:-30px 16px 0;position:relative;color:#fff}
+.off-card h2{font-size:16px;font-weight:800;text-align:left;color:#fff}
+.off-card .kbd-note{text-align:left}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="mark">TA</div>
-  <h1>You're <span>offline</span></h1>
-  <p>The website needs internet, and your phone is not connected right now.<br>Your Offline Tests are saved inside this app and work without internet.</p>
-  <div class="card">
-    <h2>Website</h2>
-    <p>Connect to the internet, then try again.</p>
-    <a class="btn btn-burg" href="https://taseriesofficial.github.io/">Try again</a>
-    <a class="btn btn-ghost" href="https://appassets.androidplatform.net/assets/www/index.html">Back to home</a>
+<div class="off-hero">
+  <div class="off-ic">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M8.5 16.5a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 3.6-2.3M12 20h.01M19 12.9a10 10 0 0 0-2.1-2.3M10.7 5.1A15 15 0 0 1 22 9M2 9a15 15 0 0 1 5.6-3.9"/></svg>
   </div>
-  <div class="card">
-    <h2>Offline Tests — work without internet</h2>
-    <p>Practice now, no internet needed.</p>
-    <a class="quiz" href="https://appassets.androidplatform.net/assets/www/quiz-ethics.html">
-      <span class="ico">NE</span>
-      <span><b>Nursing Ethics</b><span>370 MCQs · 9 chapters · 2017–2025</span></span>
-      <span class="go">›</span>
-    </a>
-    <a class="quiz" href="https://appassets.androidplatform.net/assets/www/quiz-psych.html">
-      <span class="ico">AP</span>
-      <span><b>Applied Developmental Psychology</b><span>490 MCQs · 13 chapters · 2017–2025</span></span>
-      <span class="go">›</span>
-    </a>
-  </div>
-  <p class="foot">TA SERIES — made for BS Nursing students</p>
+  <h1>You&rsquo;re <span class="lime">offline</span></h1>
+  <p>No internet connection right now. Your offline tests still work — and everything you already downloaded is still on your phone.</p>
 </div>
+
+<div class="off-card">
+  <a class="btn btn-lime" href="https://taseriesofficial.github.io/?app=1" onclick="if(window.Android&&Android.retry){Android.retry();return false;}">Try again</a>
+  <div style="height:10px"></div>
+  <a class="btn btn-black" href="https://appassets.androidplatform.net/assets/www/index.html" onclick="location.replace('https://appassets.androidplatform.net/assets/www/index.html');return false;">Back to home</a>
+  <div class="divider"></div>
+  <h2>Works without internet</h2>
+  <div style="height:12px"></div>
+  <a class="row" href="https://appassets.androidplatform.net/assets/www/quiz-ethics.html" onclick="location.replace('https://appassets.androidplatform.net/assets/www/quiz-ethics.html');return false;" style="box-shadow:none;text-align:left">
+    <span class="tile quiz"><b style="font-size:11px">QUIZ</b></span>
+    <span class="body"><b>Nursing Ethics</b><span>370 MCQs &middot; 9 chapters</span></span>
+    <span class="chev">&rsaquo;</span>
+  </a>
+  <a class="row" href="https://appassets.androidplatform.net/assets/www/quiz-psych.html" onclick="location.replace('https://appassets.androidplatform.net/assets/www/quiz-psych.html');return false;" style="box-shadow:none;text-align:left">
+    <span class="tile quiz"><b style="font-size:11px">QUIZ</b></span>
+    <span class="body"><b>Applied Developmental Psychology</b><span>490 MCQs &middot; 13 chapters</span></span>
+    <span class="chev">&rsaquo;</span>
+  </a>
+  <p class="kbd-note" style="margin-top:14px">Tip: turn your internet back on and tap &ldquo;Try again&rdquo; to reload the website. If it still does not load, check your Wi-Fi or mobile data.</p>
+</div>
+<script>
+// TA SERIES back handling: from the offline page, back goes straight home
+// (without adding history, so it can never loop home → offline → home).
+window.taBack = function(){
+  location.replace('https://appassets.androidplatform.net/assets/www/index.html');
+  return true;
+};
+</script>
 </body>
 </html>
