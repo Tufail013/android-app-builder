@@ -146,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
     s.setSupportZoom(w.optBoolean("zoom"));
     s.setBuiltInZoomControls(w.optBoolean("zoom"));
     s.setDisplayZoomControls(false);
+    s.setSupportMultipleWindows(true);
     s.setUseWideViewPort(w.optBoolean("wide", true));
     s.setLoadWithOverviewMode(w.optBoolean("overview", true));
     s.setGeolocationEnabled(false);
@@ -161,6 +162,14 @@ public class MainActivity extends AppCompatActivity {
       @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
         Uri u = r.getUrl();
         if (HOST.equals(u.getHost())) return false;
+        String h = u.getHost() == null ? "" : u.getHost();
+        // TA SERIES: keep the site and Google Drive inside the app so files open
+        // in-app and downloads go through the app's DownloadListener. Everything
+        // else (WhatsApp, mail, other sites) still opens in the browser.
+        if (h.equals("taseriesofficial.github.io") || h.endsWith(".taseriesofficial.github.io")
+            || h.equals("drive.google.com") || h.endsWith(".drive.google.com")
+            || h.equals("docs.google.com") || h.endsWith(".docs.google.com")
+            || h.equals("drive.usercontent.google.com") || h.endsWith(".googleusercontent.com")) return false;
         try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception e) { }
         return true;
       }
@@ -188,6 +197,33 @@ public class MainActivity extends AppCompatActivity {
         chooser = cb;
         try { startActivityForResult(fp.createIntent(), 77); } catch (Exception e) { chooser = null; return false; }
         return true;
+      }
+      @Override public boolean onCreateWindow(WebView v, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+        // The TA SERIES site opens file links with target="_blank". Without this,
+        // those taps do nothing in a WebView. Load them in this same WebView so
+        // shouldOverrideUrlLoading still decides in-app vs browser.
+        WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+        transport.setWebView(v);
+        resultMsg.sendToTarget();
+        return true;
+      }
+    });
+    // In-app downloads: a tap on a Drive download link saves the file to the
+    // phone's Downloads folder with a notification, instead of opening Chrome.
+    web.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+      try {
+        DownloadManager.Request req = new DownloadManager.Request(Uri.parse(url));
+        req.setMimeType(mimetype);
+        String name = URLUtil.guessFileName(url, contentDisposition, mimetype);
+        req.setTitle(name);
+        req.setDescription("TA SERIES download");
+        req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        req.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
+        req.allowScanningByMediaScanner();
+        ((DownloadManager) getSystemService(DOWNLOAD_SERVICE)).enqueue(req);
+        Toast.makeText(MainActivity.this, "Download started: " + name, Toast.LENGTH_SHORT).show();
+      } catch (Exception e) {
+        Toast.makeText(MainActivity.this, "Download failed. Open the link in your browser to download it.", Toast.LENGTH_LONG).show();
       }
     });
     web.addJavascriptInterface(new Bridge(), "Android");
