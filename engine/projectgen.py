@@ -108,6 +108,21 @@ def generate(norm, res, reg, plat, out, template_dir, extra_perms_ok=True):
     # ---- assets: page + runtime config (legacy-compatible "feat" map for the current Java template) ----
     html = c['src'].get('html', '')
     W(M + '/assets/www/index.html', html)
+    # ---- extra bundled files (e.g. offline quiz pages): everything under the
+    # repo's assets_extra/ folder is copied into assets/www/ so the app can
+    # open it offline from the same origin (localStorage keeps working).
+    extra_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'assets_extra'))
+    n_extra = 0
+    if os.path.isdir(extra_dir):
+        for _root, _dirs, _files in os.walk(extra_dir):
+            for _fn in _files:
+                _src = os.path.join(_root, _fn)
+                _dst = os.path.join(M, 'assets', 'www', os.path.relpath(_src, extra_dir))
+                os.makedirs(os.path.dirname(_dst), exist_ok=True)
+                shutil.copyfile(_src, _dst)
+                n_extra += 1
+    if n_extra:
+        sdk_notes.append('Copied %d extra asset file(s) from assets_extra/ into assets/www/.' % n_extra)
     rc = json.loads(json.dumps(c))
     rc['src'].pop('html', None)
     rc['icon']['data'] = ''
