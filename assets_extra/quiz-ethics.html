@@ -4,323 +4,57 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Nursing Ethics — TA SERIES</title>
+<link rel="stylesheet" href="ta.css">
+<link rel="stylesheet" href="quiz-theme.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
-#app{max-width:520px;margin:0 auto;min-height:100vh;position:relative;overflow:hidden;color:#1c2b33;
-background:linear-gradient(160deg,#eef7f0 0%,#e7f1ea 40%,#e6f2ee 75%,#fdf3e3 100%)}
-/* soft floating plus signs instead of balls */
-.plus{position:absolute;z-index:1;font-size:20px;color:rgba(14,154,92,.16);pointer-events:none;animation:orbFloat 5s ease-in-out infinite}
-.p1{top:11%;left:6%}
-.p2{top:36%;right:5%;animation-delay:1.5s;font-size:16px}
-.p3{bottom:15%;left:8%;animation-delay:2.5s}
-.p4{top:62%;right:8%;animation-delay:3.5s;font-size:15px;color:rgba(190,150,30,.18)}
-/* liquid glass: blur + tint + border + shadow + specular highlight */
-.glass{background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(255,255,255,.28));
-backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);
-border:1px solid rgba(255,255,255,.85);
-box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(255,255,255,.25),
-9px 12px 28px rgba(90,110,150,.16),-6px -6px 18px rgba(255,255,255,.7);
-border-radius:28px}
-/* ---------- splash / intro ---------- */
-#splash{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;
-background:linear-gradient(180deg,#0d2b23,#0e523c 55%,#0a2e22);color:#fff;transition:opacity .6s,transform .6s}
-#splash.gone{opacity:0;transform:scale(1.06);pointer-events:none}
-.cross{width:92px;height:92px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:44px;animation:pulse 1.8s ease-in-out infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.28)}70%{box-shadow:0 0 0 22px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
-.ecg{width:240px;height:56px;margin-top:26px}
-.ecg path{stroke:#7cf2c8;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:340;stroke-dashoffset:340;animation:draw 1.6s ease forwards .2s}
-@keyframes draw{to{stroke-dashoffset:0}}
-#splash h1{font-family:Georgia,serif;font-weight:400;font-size:38px;margin-top:22px;line-height:1.2}
-#splash h1 span{color:#f2c94c}
-#splash p{color:#cfe8d8;font-size:14px;line-height:1.7;margin-top:12px}
-.enter{margin-top:30px;padding:15px 40px;border-radius:999px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.14);backdrop-filter:blur(10px);color:#fff;font-size:16px;font-weight:700;cursor:pointer;animation:bob 1.6s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.flo{position:absolute;font-size:26px;pointer-events:none;animation:orbFloat 4s ease-in-out infinite}
-.f1{top:13%;left:11%;color:rgba(14,154,92,.45)}
-.f2{top:21%;right:12%;animation-delay:1.2s;color:rgba(190,150,30,.5)}
-.f3{bottom:19%;left:17%;animation-delay:2.2s;color:rgba(14,154,92,.35)}
-@keyframes orbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
-.minibook{width:126px;height:88px;position:relative;margin-top:26px;perspective:700px}
-.mb-cover{position:absolute;inset:-7px -9px;background:linear-gradient(135deg,#177a58,#0b3d2e);border:2px solid #d4af37;border-radius:10px;box-shadow:0 16px 34px rgba(0,0,0,.4)}
-.mb-page{position:absolute;top:0;width:63px;height:88px;background:#fffdf4;box-shadow:0 8px 18px rgba(0,0,0,.3)}
-.mb-page.right{right:0;border-radius:3px 9px 9px 3px;background:#f4efdb}
-.mb-page.left{left:0;border-radius:9px 3px 3px 9px;transform-origin:right center;animation:mbturn 2s ease-in-out infinite}
-@keyframes mbturn{0%,30%{transform:rotateY(0)}60%,100%{transform:rotateY(-168deg)}}
-.loadbar{width:150px;height:5px;border-radius:99px;background:rgba(255,255,255,.2);margin-top:22px;overflow:hidden}
-.loadbar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#7cf2c8,#f2c94c);animation:load 1.8s ease forwards}
-@keyframes load{to{width:100%}}
-#splash h1{animation:fadeUp .8s ease both .1s}
-#splash p{animation:fadeUp .8s ease both .25s}
-#splash .enter{animation:fadeUp .8s ease both .45s,bob 1.6s ease-in-out .9s infinite}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-/* ---------- clean top ---------- */
-.cover{position:relative;z-index:2;padding:34px 22px 4px;text-align:center}
-.eyebrow{font-size:11px;letter-spacing:5px;color:#7a8a94;font-weight:700}
-h1.big{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:42px;line-height:1.08;margin-top:12px;color:#16242c}
-h1.big em{font-style:italic;background:linear-gradient(120deg,#0e9a5c,#14684c,#2f9e6e);-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{font-size:14px;color:#66788a;line-height:1.6;margin-top:10px}
-.pills{display:flex;gap:8px;justify-content:center;margin-top:16px}
-.pill{padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:700;color:#3c5566;
-background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(255,255,255,.35));backdrop-filter:blur(14px);
-border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 6px 16px rgba(90,110,150,.12)}
-.pill b{color:#0b6e3f}
-/* ---------- the shelf: one row of real books ---------- */
-/* ---------- chapter cards grid (like the website) ---------- */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 16px 0;position:relative;z-index:2}
-.gcard{position:relative;text-align:left;background:#dfe8e1;border:none;border-radius:22px;padding:16px 30px 16px 15px;cursor:pointer;box-shadow:7px 7px 14px rgba(120,145,130,.4),-7px -7px 14px rgba(255,255,255,.85);transition:transform .15s,box-shadow .25s;font-family:inherit}
-.gcard:active{transform:scale(.97);box-shadow:inset 4px 4px 8px rgba(120,145,130,.35),inset -4px -4px 8px rgba(255,255,255,.8)}
-.gcard.wide{grid-column:1/-1}
-.gcard.kmu{background:linear-gradient(135deg,#0e7a4c,#0b3d2e);box-shadow:7px 7px 16px rgba(11,61,46,.4),-7px -7px 14px rgba(255,255,255,.7)}
-.gcard.mock{background:linear-gradient(135deg,#d4af37,#8a6d1b);box-shadow:7px 7px 16px rgba(107,85,16,.4),-7px -7px 14px rgba(255,255,255,.7)}
-.g-tag{display:block;font-size:10px;letter-spacing:2.5px;font-weight:800;color:#0b6e3f}
-.gcard.kmu .g-tag{color:#7cf2c8}
-.gcard.mock .g-tag{color:#fff}
-.g-title{display:block;font-family:Georgia,serif;font-size:17px;line-height:1.3;color:#24332b;margin-top:6px}
-.gcard.kmu .g-title,.gcard.mock .g-title{color:#fff}
-.g-sub{display:block;font-size:12.5px;color:#5a6f63;margin-top:6px}
-.gcard.kmu .g-sub{color:rgba(255,255,255,.78)}
-.gcard.mock .g-sub{color:rgba(255,255,255,.88)}
-.g-go{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:800;color:#0b6e3f}
-.gcard.kmu .g-go,.gcard.mock .g-go{color:rgba(255,255,255,.9)}
-
-.foot{text-align:center;color:#93a3ae;font-size:12px;padding:10px 22px 28px;line-height:1.6;position:relative;z-index:2}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh;background:#0B0B0C;color:#FFFFFF}
+#app{max-width:520px;margin:0 auto;min-height:100vh;position:relative;background:#0B0B0C;color:#FFFFFF}
+#view{position:relative;z-index:2}
+/* ---------- splash: black, always visible, never hidden behind an animation ---------- */
+#splash{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;background:#0B0B0C;color:#fff}
+#splash.gone{opacity:0;pointer-events:none}
+.cross{width:92px;height:92px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:44px}
+#splash h1{font-size:38px;margin-top:22px;line-height:1.2;color:#fff;font-weight:800}
+#splash h1 span{color:#C6F432}
+#splash p{color:rgba(255,255,255,.75);font-size:14px;line-height:1.7;margin-top:12px}
+.enter{margin-top:30px;padding:15px 40px;border-radius:999px;background:#C6F432;color:#0B0B0C;border:0;font-size:16px;font-weight:700;cursor:pointer}
+#splash .appload{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;color:rgba(255,255,255,.75);font-size:13px;font-weight:600}
+#splash .appload .spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:#C6F432;animation:ta-spin .8s linear infinite}
+@keyframes ta-spin{to{transform:rotate(360deg)}}
+/* ---------- setup rows (chips) ---------- */
+.optlabel{font-size:12px;letter-spacing:3px;color:rgba(11,11,12,.62);font-weight:700;margin-top:18px}
 .optrows{display:flex;flex-direction:column;gap:9px;margin-top:10px}
-.optrow{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:#dfe8e1;border:none;border-radius:18px;padding:13px 15px;font-size:15px;font-weight:600;color:#3c4f45;cursor:pointer;box-shadow:6px 6px 12px rgba(120,145,130,.4),-6px -6px 12px rgba(255,255,255,.85);transition:box-shadow .25s,background .25s,transform .15s}
-.optrow:active{transform:scale(.98)}
-.optrow .radio{flex:0 0 24px;height:24px;border-radius:50%;background:#dfe8e1;box-shadow:inset 3px 3px 6px rgba(120,145,130,.45),inset -3px -3px 6px rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800}
-.optrow.on{background:#c9ecd6;box-shadow:inset 4px 4px 8px rgba(20,104,76,.22),inset -4px -4px 8px rgba(255,255,255,.6)}
-.optrow.on .radio{background:linear-gradient(135deg,#0e9a5c,#14684c);box-shadow:0 3px 8px rgba(20,104,76,.4)}
-.liquid{position:relative;overflow:hidden;isolation:isolate}
-.liquid::before{content:"";position:absolute;left:0;top:-14%;width:100%;height:128%;z-index:-1;border-radius:48% 52% 0 0/28px 28px 0 0;background:linear-gradient(120deg,#0e9a5c,#14684c);transform:translateY(92%);transition:transform .5s cubic-bezier(.22,1,.36,1)}
-.liquid::after{content:"";position:absolute;left:14%;top:9px;width:40%;height:9px;z-index:-1;border-radius:99px;background:rgba(255,255,255,.4);opacity:0;transition:opacity .4s}
-.liquid.on::before,.liquid.fill::before{transform:translateY(0)}
-.liquid.on::after{opacity:1}
-.liquid.fill::after{opacity:.28;left:auto;right:12%;top:50%;width:56px;height:22px;animation:liquidDrift 3.2s ease-in-out infinite}
-@keyframes liquidDrift{0%,100%{transform:translate(0,-50%) scale(1)}50%{transform:translate(-16px,-50%) scale(1.3,.75)}}
-.liquid:active{transform:scale(.97)}
-.liquid:active::before{transform:translateY(0)}
-.btn.outline{background:rgba(255,255,255,.7);border:1.5px solid #0e9a5c;color:#0b6e3f}
-.optlabel{font-size:12px;letter-spacing:3px;color:#7a8a94;font-weight:700;margin-top:18px}
-.setupinfo{font-size:13.5px;color:#66788a;margin-top:16px;line-height:1.6;background:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.9);border-radius:16px;padding:12px 14px}
-.setupnote{font-size:12px;color:#93a3ae;margin-top:8px;line-height:1.5}
-.topbar .scorepill{padding:7px 9px;font-size:12px}
-.chrow{display:flex;justify-content:space-between;gap:10px;text-align:left;width:100%;background:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.9);border-radius:16px;padding:13px 15px;margin-top:9px;cursor:pointer;font-size:14.5px;line-height:1.45}
-.chrow b{color:#16242c}
-.chrow .weak{color:#b45309;font-weight:700}
+.optrow{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:#fff;border:1.5px solid #E6E6E0;border-radius:14px;padding:13px 15px;font-size:15px;font-weight:600;color:#0B0B0C;cursor:pointer}
+.optrow .radio{flex:0 0 24px;height:24px;border-radius:50%;background:#F5F5F2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800}
+.optrow.on{background:rgba(198,244,50,.18);border-color:#0B0B0C}
+.optrow.on .radio{background:#C6F432;color:#0B0B0C}
+.setupinfo{font-size:13.5px;color:rgba(11,11,12,.7);margin-top:16px;line-height:1.6;background:#F5F5F2;border:1px solid #E6E6E0;border-radius:16px;padding:12px 14px}
+.setupnote{font-size:12px;color:rgba(11,11,12,.55);margin-top:8px;line-height:1.5}
 .chdetail{text-align:left;margin-top:8px}
-.revq{background:rgba(255,255,255,.8);border-radius:14px;padding:12px;margin-top:8px;font-size:14px;line-height:1.5}
-.revq .rq{font-family:Georgia,serif;color:#16242c}
+.revq{background:#F5F5F2;border-radius:14px;padding:12px;margin-top:8px;font-size:14px;line-height:1.5;color:#0B0B0C;text-align:left}
+.revq .rq{font-weight:700;color:#0B0B0C}
 .revq .ry{color:#dc2626;margin-top:5px}
 .revq .rc{color:#16a34a;margin-top:3px}
-.revq .rr{color:#66788a;margin-top:5px;font-size:13.5px}
-.statgrid{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
-.stat{padding:10px 13px;border-radius:16px;background:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.9);font-size:12.5px;color:#66788a;line-height:1.5}
-.stat b{display:block;font-size:16px;color:#16242c}
-.wm{position:absolute;top:50%;z-index:1;writing-mode:vertical-rl;font-size:22px;letter-spacing:8px;font-weight:800;color:rgba(20,60,40,.07);pointer-events:none;white-space:nowrap}
-.wm-l{left:3px;transform:translateY(-50%) rotate(180deg)}
-.wm-r{right:3px;transform:translateY(-50%)}
-#splash .wm{color:rgba(255,255,255,.09)}
-/* ---------- book-opening overlay ---------- */
-#opener{position:absolute;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(20,30,40,.35);backdrop-filter:blur(6px)}
-#opener.show{display:flex}
-.openbook{width:250px;height:330px;position:relative;perspective:1200px;animation:zoomin .5s ease}
-@keyframes zoomin{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
-.openbook .pg{position:absolute;inset:0;border-radius:8px 18px 18px 8px;background:#fffdf4;box-shadow:0 24px 50px rgba(0,0,0,.45);transform-origin:left center;animation:pageturn 1s ease .35s forwards}
-@keyframes pageturn{from{transform:rotateY(0)}to{transform:rotateY(-178deg)}}
-.openbook .cov{position:absolute;inset:0;border-radius:8px 18px 18px 8px;background:linear-gradient(135deg,#14684c,#0b3d2e);border:2px solid #d4af37;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:18px}
-.openbook .cov h3{font-family:Georgia,serif;font-size:21px;line-height:1.3;margin-top:10px}
-.openbook .cov p{font-size:11px;letter-spacing:3px;color:#f2c94c;margin-top:10px}
-/* ---------- chapter intro page ---------- */
-.intro{margin:26px 16px;padding:34px 22px;text-align:center;position:relative;z-index:2;animation:pagein .5s ease}
-.intro .big-no{font-family:Georgia,serif;font-size:74px;line-height:1;background:linear-gradient(120deg,#0e9a5c,#14684c,#2f9e6e);-webkit-background-clip:text;background-clip:text;color:transparent}
-.intro h2{font-family:Georgia,serif;font-weight:400;font-size:26px;margin-top:12px;line-height:1.3;color:#16242c}
-.intro p{color:#66788a;line-height:1.65;margin-top:10px;font-size:15px}
-/* ---------- quiz: game feel ---------- */
-.topbar{display:flex;align-items:center;gap:10px;padding:18px 16px 8px;position:relative;z-index:2}
-.backbtn{background:linear-gradient(135deg,rgba(255,255,255,.75),rgba(255,255,255,.4));backdrop-filter:blur(12px);color:#3c5566;border:1px solid rgba(255,255,255,.85);border-radius:999px;padding:8px 14px;font-size:14px;cursor:pointer;box-shadow:inset 0 1px 0 #fff,0 6px 16px rgba(90,110,150,.14)}
-.chip{flex:1;text-align:center;font-size:12.5px;color:#66788a;line-height:1.4}
-.chip b{color:#16242c}
-.scorepill{background:linear-gradient(135deg,rgba(255,255,255,.75),rgba(255,255,255,.4));backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.85);color:#3c5566;border-radius:999px;padding:7px 12px;font-size:13px;white-space:nowrap;box-shadow:inset 0 1px 0 #fff,0 6px 16px rgba(90,110,150,.14)}
-.scorepill b{color:#0b6e3f}
-.prog{height:6px;background:rgba(255,255,255,.65);border-radius:20px;margin:8px 20px 16px;overflow:hidden;position:relative;z-index:2;box-shadow:inset 0 1px 3px rgba(90,110,150,.2)}
-.prog i{display:block;height:100%;background:linear-gradient(90deg,#0e9a5c,#14684c,#2f9e6e);border-radius:20px;transition:width .4s}
-.qcard{margin:2px 16px 18px;padding:22px 18px;position:relative;z-index:2;animation:pagein .45s ease}
-@keyframes pagein{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.qtag{display:inline-block;background:rgba(20,122,76,.12);color:#0b6e3f;font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;margin-bottom:13px}
-.qtext{font-family:Georgia,serif;font-size:20px;line-height:1.55;color:#16242c}
-.opts{margin-top:18px;display:flex;flex-direction:column;gap:11px}
-.opt{display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;background:linear-gradient(135deg,rgba(255,255,255,.8),rgba(255,255,255,.5));border:1.5px solid rgba(255,255,255,.9);border-radius:20px;padding:14px;font-size:16px;line-height:1.45;cursor:pointer;color:#1c2b33;transition:transform .45s,opacity .45s,background .25s,border-color .25s,box-shadow .25s;box-shadow:inset 0 1px 0 #fff,0 6px 16px rgba(90,110,150,.1);animation:optin .45s ease both}
-@keyframes optin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.opt:active{transform:scale(.98)}
-.opt .letter{flex:0 0 30px;height:30px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-weight:800;color:#0b6e3f;font-size:14px;box-shadow:inset 0 1px 0 #fff,0 3px 8px rgba(90,110,150,.15)}
-.opt.correct{background:linear-gradient(135deg,#d9f7e3,#b8f0cd);border-color:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25),0 12px 26px rgba(34,197,94,.3);animation:win .55s ease}
-.opt.correct .letter{background:#22c55e;color:#fff}
-.opt.wrong{background:linear-gradient(135deg,#fdecea,#fadbd8);border-color:#ef4444;animation:shake .35s ease}
-.opt.wrong .letter{background:#ef4444;color:#fff}
-.opt.dim{opacity:.35}
-.opt.gone{opacity:0;transform:scale(.82) translateY(12px);pointer-events:none}
-@keyframes win{0%{transform:scale(1)}35%{transform:scale(1.05)}60%{transform:scale(1.02)}100%{transform:scale(1.03)}}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.mark{margin-left:auto;font-size:19px;font-weight:800}
-.correct .mark{color:#16a34a}.wrong .mark{color:#dc2626}
-.why{margin-top:16px;background:rgba(255,248,220,.8);border:1px solid rgba(220,190,90,.5);border-radius:18px;padding:14px;display:none}
-.why.show{display:block;animation:pagein .35s ease}
-.why b{color:#7a5c00;font-size:14px}
-.why p{margin-top:6px;font-size:15px;line-height:1.6;color:#4a3f10}
-.next{width:100%;margin-top:16px;padding:15px;border:none;border-radius:999px;background:linear-gradient(120deg,#0e9a5c,#14684c);color:#fff;font-size:16px;font-weight:700;cursor:pointer;display:none;box-shadow:0 10px 24px rgba(20,104,76,.3),inset 0 1px 0 rgba(255,255,255,.5)}
-.next.show{display:block}
-.result{margin:22px 16px;padding:30px 22px;text-align:center;position:relative;z-index:2;animation:pagein .45s ease}
-.result h2{font-family:Georgia,serif;font-weight:400;font-size:25px;margin-top:8px;line-height:1.35;color:#16242c}
-.result .pct{font-size:46px;font-weight:800;margin-top:12px;background:linear-gradient(120deg,#0e9a5c,#14684c,#2f9e6e);-webkit-background-clip:text;background-clip:text;color:transparent}
-.result p{color:#66788a;line-height:1.65;margin-top:9px;font-size:15px}
-.btn{display:block;width:100%;padding:15px;border:none;border-radius:999px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px}
-.btn.grad{background:linear-gradient(120deg,#0e9a5c,#14684c);color:#fff;box-shadow:0 10px 24px rgba(20,104,76,.3),inset 0 1px 0 rgba(255,255,255,.5)}
-.btn.plain{background:linear-gradient(135deg,rgba(255,255,255,.8),rgba(255,255,255,.45));color:#3c5566;border:1px solid rgba(255,255,255,.85)}
-
-/* ---------- TA SERIES Burgundy & Navy ---------- */
-#app{color:#16213e;background:#eef1fa}
-.plus{color:rgba(122,10,40,.14)}
-.glass{background:#fff;border:1px solid #e6e9f5;border-radius:20px;box-shadow:0 8px 24px rgba(22,33,62,.08)}
-.topbar2{display:flex;align-items:center;gap:10px;padding:6px 2px 14px}
-.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#8a002a,#54001e);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900}
-.brand{font-size:20px;font-weight:900;color:#16213e;letter-spacing:.02em}
-.brand-pill{margin-left:auto;background:#7a0a28;color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;padding:6px 10px;border-radius:999px}
-.hero-badge{display:inline-block;background:#fff;border:1px solid #e6e9f5;color:#7a0a28;font-size:12px;font-weight:800;padding:7px 12px;border-radius:999px;box-shadow:0 2px 8px rgba(22,33,62,.06)}
-.hero-h{font-size:46px;line-height:1.02;font-weight:900;margin:14px 0 10px}
-.hero-h .b{color:#7a0a28}
-.hero-h .n{color:#16213e}
-.hero p{color:#5b6478;font-size:15px;line-height:1.55}
-.hero-btns{display:flex;gap:10px;margin-top:16px}
-.hero-btns .b-cta{flex:1;padding:14px;border:none;border-radius:999px;background:linear-gradient(135deg,#8a002a,#54001e);color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(122,10,40,.35)}
-.hero-btns .b-cta:active{transform:translateY(2px)}
-.hero-btns .b-ghost{flex:1;padding:14px;border:1.5px solid #d9deef;background:#fff;color:#16213e;font-size:15px;font-weight:800;border-radius:999px;cursor:pointer}
-.stats{display:flex;background:#fff;border:1px solid #e6e9f5;border-radius:18px;box-shadow:0 4px 14px rgba(22,33,62,.06);margin:18px 0 6px;padding:14px 6px}
-.stat2{flex:1;text-align:center}
-.stat2 b{display:block;font-size:22px;color:#16213e}
-.stat2 span{font-size:11px;color:#5b6478;font-weight:700}
-.stat2 + .stat2{border-left:1px solid #e6e9f5}
-.sec-label{margin:18px 0 2px;font-size:12px;font-weight:800;letter-spacing:.14em;color:#8a84a3}
-.grid{display:flex;flex-direction:column;gap:10px}
-.fcard{display:flex;align-items:center;gap:14px;text-align:left;background:#fff;border:1px solid #e6e9f5;border-radius:18px;box-shadow:0 2px 10px rgba(22,33,62,.05);padding:14px 16px;cursor:pointer}
-.fcard:active{transform:scale(.98)}
-.f-ico{flex:0 0 auto;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#8a002a,#54001e);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800}
-.f-body{flex:1;min-width:0}
-.f-tag{font-size:11px;font-weight:800;letter-spacing:.08em;color:#7a0a28}
-.f-title{color:#16213e;font-size:16px;font-weight:800;line-height:1.25}
-.f-sub{color:#5b6478;font-size:13px}
-.f-go{color:#b7bdd4;font-size:22px}
-.fcard.mock{background:linear-gradient(135deg,#8a002a,#54001e);border:none}
-.fcard.mock .f-ico{background:rgba(255,255,255,.18);color:#fff}
-.fcard.mock .f-tag{color:#f3c1cf}
-.fcard.mock .f-title{color:#fff}
-.fcard.mock .f-sub{color:#f3dbe0}
-.fcard.mock .f-go{color:#fff}
-.navfoot{margin-top:22px;background:#000d33;border-radius:18px;padding:16px;color:#fff;display:flex;align-items:center;gap:10px}
-.navfoot .logo{width:36px;height:36px;font-size:15px;border-radius:9px}
-.navfoot b{font-size:15px}
-.navfoot span{margin-left:auto;font-size:11px;color:#9aa3c0}
-.qcard{border-top:4px solid #7a0a28}
-.qtag{background:#fbeef2;color:#7a0a28}
-.qtext{color:#16213e}
-.opt{background:#fff;border:1.5px solid #e6e9f5;color:#16213e;border-radius:14px;box-shadow:none}
-.opt .letter{background:#fbeef2;color:#7a0a28;box-shadow:none}
-.opt.correct{background:#dcfce7;border-color:#16a34a;color:#14532d}
-.opt.correct .letter{background:#16a34a;color:#fff}
-.opt.wrong{background:#fee2e2;border-color:#dc2626;color:#7f1d1d}
-.opt.wrong .letter{background:#dc2626;color:#fff}
-.correct .mark{color:#14532d}
-.wrong .mark{color:#7f1d1d}
-.backbtn,.scorepill{background:#fff;color:#16213e;border:1px solid #e6e9f5;border-radius:999px}
-.scorepill b{color:#7a0a28}
-.chip{color:#5b6478}
-.chip b{color:#16213e}
-.prog{background:#e6e9f5;box-shadow:none}
-.prog i{background:linear-gradient(90deg,#8a002a,#54001e)}
-.why{background:#fdf2f5;border:1px solid #f3dbe0;border-radius:14px}
-.why b{color:#7a0a28}
-.why p{color:#4a4459}
-.next{background:linear-gradient(135deg,#8a002a,#54001e);color:#fff;border-radius:999px;box-shadow:0 8px 20px rgba(122,10,40,.3)}
-.result h2{color:#16213e}
-.result .pct{color:#7a0a28;background:none;-webkit-background-clip:initial;background-clip:initial}
-.result p{color:#5b6478}
-.btn.grad{background:linear-gradient(135deg,#8a002a,#54001e);color:#fff;border-radius:999px;box-shadow:0 8px 20px rgba(122,10,40,.3)}
-.btn.plain{background:#fff;color:#16213e;border:1px solid #e6e9f5;border-radius:999px}
-.btn.outline{background:#fff;border:1.5px solid #7a0a28;color:#7a0a28;border-radius:999px}
-.liquid::before{background:linear-gradient(135deg,#8a002a,#54001e)}
-.optlabel{color:#5b6478}
-.setupinfo{background:#f7f8fd;border:1px solid #e6e9f5;color:#4a4459}
-.setupnote{color:#8a84a3}
-.optrow{background:#fff;border:1.5px solid #e6e9f5;color:#16213e;border-radius:14px;box-shadow:none}
-.optrow .radio{background:#f7f8fd;box-shadow:none}
-.optrow.on{background:#fdf2f5;border-color:#7a0a28;color:#16213e;box-shadow:none}
-.optrow.on .radio{background:#7a0a28;color:#fff;box-shadow:none}
-.intro .big-no{color:#7a0a28;background:none;-webkit-background-clip:initial;background-clip:initial}
-.intro h2{color:#16213e}
-.intro p{color:#5b6478}
-.chrow{background:#f7f8fd;border:1px solid #e6e9f5;color:#4a4459}
-.chrow b{color:#16213e}
-.chrow .weak{color:#d97706}
-.revq{background:#f7f8fd}
-.revq .rq{color:#16213e}
-.revq .ry{color:#dc2626}
-.revq .rc{color:#16a34a}
-.revq .rr{color:#5b6478}
-.stat{background:#f7f8fd;border:1px solid #e6e9f5;color:#5b6478}
-.stat b{color:#16213e}
-.wm{color:rgba(22,33,62,.06)}
-.foot{color:#8a84a3}
-#splash{background:#eef1fa;color:#16213e}
-#splash h1{color:#16213e}
-#splash h1 span{color:#7a0a28}
-#splash p{color:#5b6478}
-.enter{background:linear-gradient(135deg,#8a002a,#54001e);color:#fff;border:none;border-radius:999px;box-shadow:0 8px 20px rgba(122,10,40,.3)}
-.cross{background:#fff;color:#7a0a28;border:1px solid #e6e9f5;box-shadow:0 4px 12px rgba(22,33,62,.08)}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(122,10,40,.25)}70%{box-shadow:0 0 0 22px rgba(122,10,40,0)}100%{box-shadow:0 0 0 0 rgba(122,10,40,0)}}
-.ecg path{stroke:#7a0a28}
-.loadbar{background:#e6e9f5}
-.loadbar i{background:linear-gradient(90deg,#8a002a,#54001e)}
-.mb-cover{background:linear-gradient(135deg,#8a002a,#54001e);border:2px solid #16213e}
-.openbook .cov{background:linear-gradient(135deg,#8a002a,#54001e);border:2px solid #16213e}
-.openbook .cov p{color:#f3c1cf}
-.flo{color:rgba(122,10,40,.3)}
-#splash .wm{color:rgba(22,33,62,.06)}
-.ring-wrap{position:relative;width:150px;height:150px;margin:10px auto 4px}
-.ring-wrap svg{transform:rotate(-90deg)}
-.ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ring-num b{font-size:36px;color:#7a0a28}
-.ring-num span{font-size:12px;color:#5b6478;font-weight:700}
-</style>
-
-<style>
-/* TA SERIES app fix: the splash title, text and Enter button use a fade-up
-   animation that starts at opacity 0. On phones with animations turned off
-   they stay invisible forever, so the quiz looks like a blank white screen.
-   Force them visible no matter what. */
-#splash h1,#splash p,#splash .enter{animation:none!important;opacity:1!important;transform:none!important}
-/* Loading spinner shown while the test opens (under a second). */
-#splash .appload{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;color:#53627D;font-size:13px;font-weight:600}
-#splash .appload .spin{width:16px;height:16px;border-radius:50%;border:2px solid #DCE4F2;border-top-color:#7A1233;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.revq .rr{color:rgba(11,11,12,.62);margin-top:5px;font-size:13.5px}
+.qz-hero .big-no{font-size:52px;font-weight:800;color:#C6F432;line-height:1;margin-top:10px}
+.sec-label{margin:18px 0 10px;font-size:12px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.65)}
+/* Safety: the splash can never stay invisible because an animation did not run. */
+#splash h1,#splash p,#splash .enter{opacity:1!important}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
 </style>
 </head>
 <body>
 <div id="app">
-  <span class="plus p1">✚</span><span class="plus p2">♥</span><span class="plus p3">✚</span><span class="plus p4">♥</span>
-  <span class="wm wm-l">TA SERIES</span><span class="wm wm-r">TA SERIES</span>
   <div id="splash">
-    <span class="flo f1">✚</span><span class="flo f2">♥</span><span class="flo f3">✚</span>
-    <span class="wm wm-l">TA SERIES</span><span class="wm wm-r">TA SERIES</span>
     <div class="cross">✚</div>
-    <svg class="ecg" viewBox="0 0 240 56"><path d="M0 28 H60 L72 28 L80 10 L92 46 L100 22 L108 28 H150 L160 28 L168 14 L178 42 L186 28 H240"/></svg>
-    <div class="minibook"><div class="mb-cover"></div><div class="mb-page right"></div><div class="mb-page left"></div></div>
     <h1>Nursing<br><span>Ethics</span></h1>
     <p>TA SERIES • NU257<br>370 solved past-paper MCQs • 9 chapters • 2017–2025</p>
     <button class="enter" onclick="enterApp()">Tap to Enter →</button>
     <div class="appload"><span class="spin"></span>Loading your test…</div>
-    <div class="loadbar"><i></i></div>
   </div>
-  <div id="opener"><div class="openbook"><div class="cov"><div style="font-size:38px">📖</div><h3 id="openerTitle"></h3><p>TA SERIES • OPENING</p></div><div class="pg"></div></div></div>
   <div id="view"></div>
 </div>
 <script>
@@ -329,6 +63,18 @@ const CHAPTERS = DATA.chapters;
 const QS = DATA.questions;
 const SHELF=[{n:'P',title:'KMU Paper Practice',count:70,paper:true},...CHAPTERS,{n:0,title:'Full Mock Test',count:370,mock:true}];
 let cur=null, soundOn=true, entered=false, streak=0;
+let screen='cover';
+// TA SERIES back handling (v1.0.4): back always goes up one level.
+// In a running test it asks first so progress is never lost silently.
+// On the cover it answers false, so the app goes back to Home.
+window.taBack=function(){
+  if(screen==='test'){
+    if(confirm('Leave this test? Your progress will be lost.')){ exitQuiz(); }
+    return true;
+  }
+  if(screen!=='cover'){ renderCover(); return true; }
+  return false;
+};
 function byChapter(n){ return QS.filter(q=>q.chapter===n); }
 function best(n){ try{ return JSON.parse(localStorage.getItem('ta-ethics-best')||'{}')[n]||null }catch(e){ return null } }
 function saveBest(n,pct){ try{ const b=JSON.parse(localStorage.getItem('ta-ethics-best')||'{}'); if(!b[n]||pct>b[n]){ b[n]=pct; localStorage.setItem('ta-ethics-best', JSON.stringify(b)); } }catch(e){} }
@@ -336,41 +82,60 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function beep(ok){ if(!soundOn) return; try{ const c=new (window.AudioContext||window.webkitAudioContext)(); const o=c.createOscillator(), g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.value= ok?880:220; g.gain.value=.06; o.start(); o.stop(c.currentTime+.16); setTimeout(()=>c.close(),250);}catch(e){} }
 function enterApp(){ if(entered) return; entered=true; document.getElementById('splash').classList.add('gone'); renderCover(); }
 function renderCover(){
+  screen='cover';
+
   const card=(c)=>{
     const b=best(c.mock?'mock':c.paper?'paper':c.n);
     const act=c.mock?'openMock()':c.paper?'openPaper()':'openChapter('+c.n+')';
     const tag=c.mock?'MOCK TEST':c.paper?'PAPER PRACTICE':'CHAPTER '+c.n;
     const ico=c.mock?'🎯':c.paper?'📝':c.n;
     const sub=c.mock?'All 370 MCQs · Real Paper 70 in 90 min':c.paper?'70 MCQs · 90 minutes':c.count+' MCQs'+(b!=null?' · Best '+b+'%':'');
-    return `<button class="fcard${c.mock?' mock':''}${c.paper?' kmu':''}" onclick="${act}">
-    <span class="f-ico">${ico}</span>
-    <span class="f-body"><span class="f-tag">${tag}</span><br>
-    <span class="f-title">${esc(c.title)}</span><br>
-    <span class="f-sub">${sub}</span></span>
-    <span class="f-go">›</span></button>`;
+    return `<button class="qz-chapter" onclick="${act}"><span class="n">${ico}</span><span style="flex:1;text-align:left"><b>${esc(c.title)}</b><span>${tag} · ${sub}</span></span><span class="cnt">›</span></button>`;
   };
   const chs=CHAPTERS.map(card).join('');
-  const kmu=card(SHELF[0]), mock=card(SHELF[SHELF.length-1]);
+  const yrs=yearsOf(QS);
+  const mockBest=best('mock');
   document.getElementById('view').innerHTML = `
-  <div class="topbar2"><span class="logo">TA</span><span class="brand">TA SERIES</span><span class="brand-pill">NU257</span></div>
-  <div class="hero"><span class="hero-badge">🎓 Free Study Resources for BSN Students</span>
-  <h1 class="hero-h"><span class="b">Nursing</span><br><span class="n">Ethics</span></h1>
-  <p>Study smarter. Prepare better. Excel in your journey.</p>
-  <div class="hero-btns"><button class="b-cta" onclick="openMock()">🎯 Start Mock Test →</button><button class="b-ghost" onclick="openPaper()">📝 Paper Practice</button></div></div>
-  <div class="stats"><div class="stat2"><b>370</b><span>MCQs</span></div><div class="stat2"><b>9</b><span>Chapters</span></div><div class="stat2"><b>5</b><span>Years</span></div><div class="stat2"><b>70</b><span>Mock MCQs</span></div></div>
-  <div class="sec-label">KMU PAPER &amp; MOCK TEST</div>
-  <div class="grid">${kmu}${mock}</div>
-  <div class="sec-label">CHAPTERS — TAP TO OPEN</div>
-  <div class="grid">${chs}</div>
-  <div class="navfoot"><span class="logo">TA</span><b>TA SERIES</b><span>© 2026 TA SERIES</span></div>`;
+  <div class="qz">
+    <div class="qz-hero">
+      <a class="qz-home" href="https://appassets.androidplatform.net/assets/www/index.html" onclick="location.replace('https://appassets.androidplatform.net/assets/www/index.html');return false;">‹ Home</a>
+      <div style="height:12px"></div>
+      <span class="crumb">Practice &amp; Exam Preparation · Offline Test</span>
+      <h1>Nursing Ethics</h1>
+      <p>NU257 · 370 MCQs from KMU past papers 2017–2025, with answers and explanations. Saved inside the app — no internet needed.</p>
+    </div>
+    <div class="qz-card">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="chip lime">370 MCQs</span>
+        <span class="chip">9 chapters</span>
+        <span class="chip">${yrs[0]}–${yrs[yrs.length-1]} papers</span>
+        <span class="chip black">Best score: ${mockBest!=null?mockBest+'%':'—'}</span>
+      </div>
+      <div class="qz-stats">
+        <div class="qz-stat"><b>370</b><span>Questions</span></div>
+        <div class="qz-stat"><b>9</b><span>Chapters</span></div>
+        <div class="qz-stat"><b>70</b><span>Mock · 90 min</span></div>
+        <div class="qz-stat"><b>${mockBest!=null?mockBest+'%':'—'}</b><span>Best score</span></div>
+      </div>
+      <div style="height:16px"></div>
+      <button class="btn btn-lime" onclick="openMock()">Start Mock Test →</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-ghost" onclick="openPaper()">Paper Practice — 70 in 90 min</button>
+      <div style="height:10px"></div>
+      <a class="btn btn-outline" href="https://wa.me/923055959410?text=TA%20SERIES%20feedback%3A%20">Give Feedback</a>
+    </div>
+    <div class="wrap no-nav" style="padding-top:18px">
+      <div class="sec-head" style="margin-top:8px"><h2>Chapters</h2><span style="font-size:13px;color:rgba(255,255,255,.65);font-weight:700">Tap a chapter to practise it</span></div>
+      ${chs}
+      <p class="kbd-note" style="margin-top:16px">Best scores are saved on this phone only. Your progress never leaves your phone.</p>
+    </div>
+  </div>`;
   window.scrollTo(0,0);
 }
 function openChapter(n){
+  screen='choice';
   chN=n; chSetup={count:'all',diff:'all',year:'all',shuffle:false};
-  const c=CHAPTERS.find(x=>x.n===n);
-  document.getElementById('openerTitle').textContent=c.title;
-  const op=document.getElementById('opener'); op.classList.add('show');
-  setTimeout(()=>{ op.classList.remove('show'); renderChapterChoice(n); }, 1150);
+  renderChapterChoice(n);
 }
 function fmtTime(s){ const m=Math.floor(s/60), r=s%60; return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0'); }
 function yearsOf(list){ const s=new Set(); list.forEach(q=>{ const m=/^(\d{4})/.exec(q.tag||''); if(m) s.add(m[1]); }); return [...s].sort(); }
@@ -393,100 +158,136 @@ function pickFrom(pool, want, fallback, shuffle){
   return list.concat(rest.slice(0,want-list.length));
 }
 function renderChapterChoice(n){
+  screen='choice';
   const c=CHAPTERS.find(x=>x.n===n), b=best(n);
   document.getElementById('view').innerHTML = `
-  <div class="intro glass"><div class="eyebrow">TA SERIES • NU257</div>
-  <div class="big-no">${String(n).padStart(2,'0')}</div>
-  <h2>${esc(c.title)}</h2>
-  <p>${c.count} solved MCQs from past papers 2017–2025.${b!=null?' Your best score here is '+b+'%.':''}</p>
-  <button class="btn grad liquid fill" onclick="startChapterDirect(${n})" style="margin-top:20px">📖 Start Chapter — All ${c.count} MCQs</button>
-  <button class="btn outline liquid" onclick="renderChapterSetup(${n})" style="margin-top:12px">⚙️ Customise Test</button>
-  <button class="btn plain" onclick="renderCover()">← Back</button></div>`;
+  <div class="qz">
+    <div class="qz-hero">
+      <a class="qz-home" href="javascript:void(0)" onclick="renderCover()">‹ Nursing Ethics</a>
+      <div style="height:12px"></div>
+      <span class="crumb">Chapter ${n} · NU257</span>
+      <div class="big-no">${String(n).padStart(2,'0')}</div>
+      <h1>${esc(c.title)}</h1>
+      <p>${c.count} solved MCQs from past papers 2017–2025.${b!=null?' Your best score here is '+b+'%.':''}</p>
+    </div>
+    <div class="qz-card">
+      <button class="btn btn-lime" onclick="startChapterDirect(${n})">Start Chapter — All ${c.count} MCQs</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-ghost" onclick="renderChapterSetup(${n})">Customise Test</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-outline" onclick="renderCover()">← Back</button>
+    </div>
+  </div>`;
   window.scrollTo(0,0);
 }
 function startChapterDirect(n){ chSetup={count:'all',diff:'all',year:'all',shuffle:false}; startChapter(n); }
 function renderChapterSetup(n){
+  screen='setup';
   const c=CHAPTERS.find(x=>x.n===n), b=best(n);
   const pool=byChapter(n).filter(q=>(chSetup.diff==='all'||q.diff===+chSetup.diff)&&(chSetup.year==='all'||(q.tag||'').startsWith(chSetup.year)));
   const counts=[10,20,30].filter(x=>x<c.count);
   const want=chSetup.count==='all'?pool.length:Math.min(+chSetup.count,c.count);
   document.getElementById('view').innerHTML = `
-  <div class="intro glass"><div class="eyebrow">TA SERIES • NU257</div>
-  <div class="big-no">${String(n).padStart(2,'0')}</div>
-  <h2>${esc(c.title)}</h2>
-  <p>${c.count} solved MCQs from past papers 2017–2025.${b!=null?' Your best score here is '+b+'%.':''}</p>
-  ${chips('HOW MANY MCQs?', 'count', [...counts.map(x=>[String(x),String(x)]),['all','All '+c.count]], chSetup.count, 'setCh')}
-  ${chips('DIFFICULTY', 'diff', [['all','All levels'],['1','Easy'],['2','Medium'],['3','Hard'],['4','Very Hard']], chSetup.diff, 'setCh')}
-  ${chips('WHICH YEAR?', 'year', [['all','All years'],...yearsOf(byChapter(n)).map(y=>[y,y])], chSetup.year, 'setCh')}
-  <div class="optlabel">SHUFFLE</div>
-  <div class="optrows"><button class="optrow${chSetup.shuffle?' on':''}" onclick="toggleChShuffle()"><span>Shuffle questions · ${chSetup.shuffle?'On':'Off'}</span><span class="radio">${chSetup.shuffle?'✓':''}</span></button></div>
-  <div class="setupinfo">You will get <b>${want} questions</b> · about <b>${want} minutes</b> (1 minute per question).${pool.length<want&&chSetup.count!=='all'?' Only '+pool.length+' match your filters, so the rest are mixed from this chapter.':''}</div>
-  <div class="setupnote">Difficulty is set by the app to help you practise — the book does not mark it.</div>
-  <button class="btn grad liquid fill" onclick="startChapter(${n})" style="margin-top:20px">Start Questions →</button>
-  <button class="btn plain" onclick="renderCover()">← Back</button></div>`;
+  <div class="qz">
+    <div class="qz-hero">
+      <a class="qz-home" href="javascript:void(0)" onclick="renderChapterChoice(${n})">‹ ${esc(c.title)}</a>
+      <div style="height:12px"></div>
+      <span class="crumb">Set up your test</span>
+      <h1>${esc(c.title)}</h1>
+      <p>${c.count} solved MCQs from past papers 2017–2025.${b!=null?' Your best score here is '+b+'%.':''}</p>
+    </div>
+    <div class="qz-card">
+      ${chips('HOW MANY MCQs?', 'count', [...counts.map(x=>[String(x),String(x)]),['all','All '+c.count]], chSetup.count, 'setCh')}
+      ${chips('DIFFICULTY', 'diff', [['all','All levels'],['1','Easy'],['2','Medium'],['3','Hard'],['4','Very Hard']], chSetup.diff, 'setCh')}
+      ${chips('WHICH YEAR?', 'year', [['all','All years'],...yearsOf(byChapter(n)).map(y=>[y,y])], chSetup.year, 'setCh')}
+      <div class="optlabel">SHUFFLE</div>
+      <div class="optrows"><button class="optrow${chSetup.shuffle?' on':''}" onclick="toggleChShuffle()"><span>Shuffle questions · ${chSetup.shuffle?'On':'Off'}</span><span class="radio">${chSetup.shuffle?'✓':''}</span></button></div>
+      <div class="setupinfo">You will get <b>${want} questions</b> · about <b>${want} minutes</b> (1 minute per question).${pool.length<want&&chSetup.count!=='all'?' Only '+pool.length+' match your filters, so the rest are mixed from this chapter.':''}</div>
+      <div class="setupnote">Difficulty is set by the app to help you practise — the book does not mark it.</div>
+      <button class="btn btn-lime" onclick="startChapter(${n})" style="margin-top:20px">Start Questions →</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-outline" onclick="renderCover()">← Back</button>
+    </div>
+  </div>`;
   window.scrollTo(0,0);
 }
 function renderMockSetup(){
+  screen='setup';
   const b=best('mock');
   const pool=QS.filter(q=>(mockSetup.diff==='all'||q.diff===+mockSetup.diff)&&(mockSetup.year==='all'||(q.tag||'').startsWith(mockSetup.year)));
   const want=mockSetup.mode==='real'?70:mockSetup.mode==='quick'?20:pool.length;
   document.getElementById('view').innerHTML = `
-  <div class="intro glass"><div class="eyebrow">TA SERIES • NU257</div>
-  <div style="font-size:52px;margin-top:8px">🎯</div>
-  <h2>Full Mock Test</h2>
-  <p>All 370 solved MCQs from past papers 2017–2025.${b!=null?' Your best mock score is '+b+'%.':''}</p>
-  ${chips('CHOOSE YOUR TEST', 'mode', [['real','Real Paper — 70 MCQs · 90 min'],['quick','Quick — 20 MCQs'],['full','Full — all 370 MCQs']], mockSetup.mode, 'setMock')}
-  ${chips('DIFFICULTY', 'diff', [['all','All levels'],['1','Easy'],['2','Medium'],['3','Hard'],['4','Very Hard']], mockSetup.diff, 'setMock')}
-  ${chips('WHICH YEAR?', 'year', [['all','All years'],...yearsOf(QS).map(y=>[y,y])], mockSetup.year, 'setMock')}
-  <div class="optlabel">SHUFFLE</div>
-  <div class="optrows"><button class="optrow${mockSetup.shuffle?' on':''}" onclick="toggleMockShuffle()"><span>Shuffle questions · ${mockSetup.shuffle?'On':'Off'}</span><span class="radio">${mockSetup.shuffle?'✓':''}</span></button></div>
-  <div class="setupinfo">You will get <b>${want} questions</b>${mockSetup.mode==='real'?' · <b>90 minutes</b> on the clock, just like your real paper':''} · about <b>${want} minutes</b> of work.</div>
-  <div class="setupnote">Difficulty is set by the app to help you practise — the book does not mark it.</div>
-  <button class="btn grad liquid fill" onclick="startMock()" style="margin-top:20px">Start Mock Test →</button>
-  <button class="btn plain" onclick="renderCover()">← Back</button></div>`;
+  <div class="qz">
+    <div class="qz-hero">
+      <a class="qz-home" href="javascript:void(0)" onclick="renderCover()">‹ Nursing Ethics</a>
+      <div style="height:12px"></div>
+      <span class="crumb">Set up your test</span>
+      <h1>How do you want<br>to practise?</h1>
+      <p>Pick a mode. Every question shows the answer and the explanation right away, so you learn as you go.${b!=null?' Your best mock score is '+b+'%.':''}</p>
+    </div>
+    <div class="qz-card">
+      ${chips('CHOOSE YOUR TEST', 'mode', [['real','Real Paper — 70 MCQs · 90 min'],['quick','Quick — 20 MCQs'],['full','Full — all 370 MCQs']], mockSetup.mode, 'setMock')}
+      ${chips('DIFFICULTY', 'diff', [['all','All levels'],['1','Easy'],['2','Medium'],['3','Hard'],['4','Very Hard']], mockSetup.diff, 'setMock')}
+      ${chips('WHICH YEAR?', 'year', [['all','All years'],...yearsOf(QS).map(y=>[y,y])], mockSetup.year, 'setMock')}
+      <div class="optlabel">SHUFFLE</div>
+      <div class="optrows"><button class="optrow${mockSetup.shuffle?' on':''}" onclick="toggleMockShuffle()"><span>Shuffle questions · ${mockSetup.shuffle?'On':'Off'}</span><span class="radio">${mockSetup.shuffle?'✓':''}</span></button></div>
+      <div class="setupinfo">You will get <b>${want} questions</b>${mockSetup.mode==='real'?' · <b>90 minutes</b> on the clock, just like your real paper':''} · about <b>${want} minutes</b> of work.</div>
+      <div class="setupnote">Difficulty is set by the app to help you practise — the book does not mark it.</div>
+      <button class="btn btn-lime" onclick="startMock()" style="margin-top:20px">Start Mock Test →</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-outline" onclick="renderCover()">← Back</button>
+    </div>
+  </div>`;
   window.scrollTo(0,0);
 }
 let paperSetup={mode:'year',year:'2024'};
 function setPaper(k,v){ paperSetup[k]=v; renderPaperSetup(); }
 function openPaper(){
-  document.getElementById('openerTitle').textContent='KMU Paper Practice';
-  const op=document.getElementById('opener'); op.classList.add('show');
-  setTimeout(()=>{ op.classList.remove('show'); renderPaperSetup(); }, 1150);
+  screen='setup';
+  renderPaperSetup();
 }
 function renderPaperSetup(){
+  screen='setup';
   const b=best('paper');
   const yearCount=paperSetup.mode==='year'?QS.filter(q=>(q.tag||'').startsWith(paperSetup.year)).length:370;
   document.getElementById('view').innerHTML = `
-  <div class="intro glass"><div class="eyebrow">TA SERIES • NU257</div>
-  <div style="font-size:52px;margin-top:8px">📝</div>
-  <h2>KMU Paper Practice</h2>
-  <p>Your real paper, online. 70 MCQs in 90 minutes.${b!=null?' Your best paper score is '+b+'%.':''}</p>
-  ${chips('HOW DO YOU WANT IT?', 'mode', [['year','One full year'],['all','Shuffle all years']], paperSetup.mode, 'setPaper')}
-  <div style="${paperSetup.mode==='all'?'opacity:.45;pointer-events:none':''}">${chips('WHICH YEAR?', 'year', [['2017','2017'],['2018','2018'],['2022','2022'],['2024','2024'],['2025','2025']], paperSetup.year, 'setPaper')}</div>
-  <div class="setupinfo">You will get <b>70 questions</b> · <b>90 minutes</b> on the clock, just like your real paper.${paperSetup.mode==='year'&&yearCount<70?' Year '+paperSetup.year+' has only '+yearCount+' MCQs, so '+(70-yearCount)+' more will come from other years.':''}</div>
-  <button class="btn grad liquid fill" onclick="startPaper()" style="margin-top:20px">Start Paper →</button>
-  <button class="btn plain" onclick="renderCover()">← Back</button></div>`;
+  <div class="qz">
+    <div class="qz-hero">
+      <a class="qz-home" href="javascript:void(0)" onclick="renderCover()">‹ Nursing Ethics</a>
+      <div style="height:12px"></div>
+      <span class="crumb">KMU Paper Practice</span>
+      <h1>Your real paper,<br>online.</h1>
+      <p>70 MCQs in 90 minutes, just like your real paper.${b!=null?' Your best paper score is '+b+'%.':''}</p>
+    </div>
+    <div class="qz-card">
+      ${chips('HOW DO YOU WANT IT?', 'mode', [['year','One full year'],['all','Shuffle all years']], paperSetup.mode, 'setPaper')}
+      <div style="${paperSetup.mode==='all'?'opacity:.45;pointer-events:none':''}">${chips('WHICH YEAR?', 'year', [['2017','2017'],['2018','2018'],['2022','2022'],['2024','2024'],['2025','2025']], paperSetup.year, 'setPaper')}</div>
+      <div class="setupinfo">You will get <b>70 questions</b> · <b>90 minutes</b> on the clock, just like your real paper.${paperSetup.mode==='year'&&yearCount<70?' Year '+paperSetup.year+' has only '+yearCount+' MCQs, so '+(70-yearCount)+' more will come from other years.':''}</div>
+      <button class="btn btn-lime" onclick="startPaper()" style="margin-top:20px">Start Paper →</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-outline" onclick="renderCover()">← Back</button>
+    </div>
+  </div>`;
   window.scrollTo(0,0);
 }
 function startPaper(){
   const s=paperSetup;
   const pool=s.mode==='year'?QS.filter(q=>(q.tag||'').startsWith(s.year)):QS;
   const list=pickFrom(pool, 70, QS, true);
-  cur={list,idx:0,score:0,title:'KMU Paper Practice — '+(s.mode==='year'?s.year:'All Years'),no:null,mode:'paper',setup:{...s},timeLimit:90*60,startTime:Date.now(),qStart:Date.now(),fast:0,wrong:[],answers:[],timerId:null};
+  cur={list,idx:0,score:0,title:'KMU Paper Practice — '+(s.mode==='year'?s.year:'All Years'),no:null,mode:'paper',setup:{...s},timeLimit:90*60,startTime:Date.now(),qStart:Date.now(),fast:0,wrong:[],answers:[],picked:{},okByIdx:{},whyByIdx:{},timerId:null};
   streak=0;
   renderQuiz();
 }
 function openMock(){
-  document.getElementById('openerTitle').textContent='Full Mock Test';
-  const op=document.getElementById('opener'); op.classList.add('show');
-  setTimeout(()=>{ op.classList.remove('show'); renderMockSetup(); }, 1150);
+  screen='setup';
+  renderMockSetup();
 }
 function startChapter(n){
   const s=chSetup;
   const pool=byChapter(n).filter(q=>(s.diff==='all'||q.diff===+s.diff)&&(s.year==='all'||(q.tag||'').startsWith(s.year)));
   const list=pickFrom(pool, s.count, byChapter(n), s.shuffle);
   const c=CHAPTERS.find(x=>x.n===n);
-  cur={list,idx:0,score:0,title:'Chapter '+n+' — '+c.title,no:n,mode:'chapter',setup:{...s},timeLimit:null,startTime:Date.now(),qStart:Date.now(),fast:0,wrong:[],answers:[],timerId:null};
+  cur={list,idx:0,score:0,title:'Chapter '+n+' — '+c.title,no:n,mode:'chapter',setup:{...s},timeLimit:null,startTime:Date.now(),qStart:Date.now(),fast:0,wrong:[],answers:[],picked:{},okByIdx:{},whyByIdx:{},timerId:null};
   streak=0;
   renderQuiz();
 }
@@ -495,31 +296,54 @@ function startMock(){
   const pool=QS.filter(q=>(s.diff==='all'||q.diff===+s.diff)&&(s.year==='all'||(q.tag||'').startsWith(s.year)));
   const want=s.mode==='real'?70:s.mode==='quick'?20:'all';
   const list=pickFrom(pool, want, QS, s.shuffle);
-  cur={list,idx:0,score:0,title:'Full Mock Test',no:null,mode:'mock',setup:{...s},timeLimit:s.mode==='real'?90*60:null,startTime:Date.now(),qStart:Date.now(),fast:0,wrong:[],answers:[],timerId:null};
+  cur={list,idx:0,score:0,title:'Full Mock Test',no:null,mode:'mock',setup:{...s},timeLimit:s.mode==='real'?90*60:null,startTime:Date.now(),qStart:Date.now(),fast:0,wrong:[],answers:[],picked:{},okByIdx:{},whyByIdx:{},timerId:null};
   streak=0;
   renderQuiz();
 }
 function exitQuiz(){ if(cur&&cur.timerId) clearInterval(cur.timerId); renderCover(); }
 function toggleSound(){ soundOn=!soundOn; const b=document.getElementById('sndbtn'); if(b) b.textContent=soundOn?'🔊':'🔇'; }
+function prevQ(){ if(cur&&cur.idx>0){ cur.idx--; renderQuiz(); } }
 function renderQuiz(){
+  screen='test';
   if(cur.timerId) clearInterval(cur.timerId);
   const q=cur.list[cur.idx], letters=['A','B','C','D'];
+  const answered=cur.picked[cur.idx]!==undefined;
   document.getElementById('view').innerHTML = `
-  <div class="topbar"><button class="backbtn" onclick="exitQuiz()">‹ Back</button>
-  <div class="chip"><b>${esc(cur.title)}</b><br><span style="font-size:11px;letter-spacing:2px">TA SERIES • NU257</span></div>
-  <div class="scorepill"><span id="timer">⏱ 00:00</span> · <span id="scorepill">Score <b>${cur.score}</b>${streak>1?' &nbsp;🔥'+streak:''}</span></div>
-  <button class="backbtn" id="sndbtn" onclick="toggleSound()">${soundOn?'🔊':'🔇'}</button></div>
-  <div class="prog"><i style="width:${Math.round(cur.idx/cur.list.length*100)}%"></i></div>
-  <div class="qcard glass">
-    <span class="qtag">${esc(q.tag||'Past Paper')} &nbsp;•&nbsp; Q ${cur.idx+1} of ${cur.list.length}</span>
-    <div class="qtext">${esc(q.q)}</div>
-    <div class="opts" id="opts">
-      ${q.options.map((o,i)=>`<button class="opt" style="animation-delay:${i*0.09}s" onclick="answer(${i},this)"><span class="letter">${letters[i]}</span><span>${esc(o)}</span><span class="mark"></span></button>`).join('')}
+  <div class="qz">
+    <div class="qz-topbar">
+      <button class="back" onclick="exitQuiz()">‹ Exit</button>
+      <div class="qz-progress" role="progressbar" aria-label="Test progress"><i id="prog" style="width:${Math.round(cur.idx/cur.list.length*100)}%"></i></div>
+      <span class="qz-timer" id="timer">⏱ ${cur.timeLimit?fmtTime(cur.timeLimit):'00:00'}</span>
+      <button class="qz-snd" id="sndbtn" onclick="toggleSound()">${soundOn?'🔊':'🔇'}</button>
     </div>
-    <div class="why" id="why"><b>Why?</b><p id="whytext"></p></div>
-    <button class="next liquid fill" id="nextbtn" onclick="nextQ()">${cur.idx+1===cur.list.length?'See My Result →':'Next Question →'}</button>
+    <div class="qz-q">
+      <span class="qz-tag">${esc(q.tag||'Past Paper')} · Chapter ${q.chapter} · Question ${cur.idx+1} of ${cur.list.length}</span>
+      <p class="qz-qtext">${esc(q.q)}</p>
+      <div id="opts">
+        ${q.options.map((o,i)=>{
+          let cls='qz-opt', mark='<span class="qz-mark"></span>';
+          if(answered){
+            cls+=' locked';
+            if(i===q.answer){ cls+=' correct'; mark='<span class="qz-mark ok">✓</span>'; }
+            else if(i===cur.picked[cur.idx]){ cls+=' wrong'; mark='<span class="qz-mark no">✕</span>'; }
+            else cls+=' dim';
+          }
+          return `<button class="${cls}" onclick="answer(${i},this)"><span class="letter">${letters[i]}</span><span style="flex:1">${esc(o)}</span>${mark}</button>`;
+        }).join('')}
+      </div>
+      <div class="qz-why" id="why"${answered?'':' hidden'}>
+        <b>Why this answer</b>
+        <p id="why-text">${answered?esc(cur.whyByIdx[cur.idx]):''}</p>
+      </div>
+      <div class="qz-palette" id="palette" aria-label="All questions"></div>
+    </div>
+    <div class="qz-nextbar"><div class="qz-nextbar-in">
+      <button class="qz-prev" id="prevbtn" onclick="prevQ()" aria-label="Previous question"${cur.idx===0?' style="visibility:hidden"':''}>‹</button>
+      <button class="qz-next" id="nextbtn" onclick="nextQ()"${answered?'':' disabled'}>${cur.idx+1===cur.list.length?'See My Result ›':'Next ›'}</button>
+    </div></div>
   </div>`;
   window.scrollTo(0,0);
+  renderPalette();
   cur.qStart=Date.now();
   cur.timerId=setInterval(()=>{
     const el=document.getElementById('timer');
@@ -528,46 +352,61 @@ function renderQuiz(){
       const left=cur.timeLimit-Math.floor((Date.now()-cur.startTime)/1000);
       if(left<=0){ el.textContent='⏱ 00:00'; clearInterval(cur.timerId); renderResult(true); return; }
       el.textContent='⏱ '+fmtTime(left);
+      if(left<=60) el.classList.add('low');
     } else {
       el.textContent='⏱ '+fmtTime(Math.floor((Date.now()-cur.startTime)/1000));
     }
   },1000);
 }
+function renderPalette(){
+  const pal=document.getElementById('palette');
+  if(!pal||!cur) return;
+  pal.innerHTML='';
+  cur.list.forEach((qq,i)=>{
+    const p=document.createElement('button');
+    p.className='qz-pal'; p.type='button'; p.textContent=i+1;
+    if(cur.picked[i]!==undefined) p.classList.add(cur.okByIdx[i]?'ok':'no');
+    if(i===cur.idx) p.classList.add('now');
+    p.addEventListener('click',function(){ cur.idx=i; renderQuiz(); window.scrollTo(0,0); });
+    pal.appendChild(p);
+  });
+}
 function answer(i,btn){
-  if(btn.parentElement.dataset.done) return;
-  btn.parentElement.dataset.done='1';
+  if(cur.picked[cur.idx]!==undefined) return;
   const q=cur.list[cur.idx];
-  const opts=document.querySelectorAll('.opt');
+  const opts=document.querySelectorAll('.qz-opt');
   const correct=i===q.answer;
   const dt=Math.round((Date.now()-cur.qStart)/1000);
   if(dt<=10) cur.fast++;
   cur.answers.push({q,picked:i,ok:correct,dt});
-  opts.forEach((o,j)=>{ o.style.pointerEvents='none'; });
-  if(correct){
-    streak++; cur.score++; beep(true);
-    opts.forEach((o,j)=>{
-      if(j===q.answer){ o.classList.add('correct'); o.querySelector('.mark').textContent='✓'; }
-      else { o.style.transitionDelay=(0.08*(j+1))+'s'; o.classList.add('gone'); }
-    });
-    document.getElementById('whytext').textContent=(dt<=10?'⚡ Fast answer — '+dt+'s! ':'')+'Correct! '+q.rationale;
-  } else {
-    streak=0; beep(false);
-    cur.wrong.push({q,picked:i});
-    opts.forEach((o,j)=>{
-      if(j===q.answer){ o.classList.add('correct'); o.querySelector('.mark').textContent='✓'; }
-      else if(j===i){ o.classList.add('wrong'); o.querySelector('.mark').textContent='✗'; }
-      else o.classList.add('dim');
-    });
-    document.getElementById('whytext').textContent='Not quite. The correct answer is '+['A','B','C','D'][q.answer]+'. '+q.rationale;
-  }
-  document.getElementById('scorepill').innerHTML='Score <b>'+cur.score+'</b>'+(streak>1?' &nbsp;🔥'+streak:'');
-  document.querySelector('.prog i').style.width=Math.round((cur.idx+1)/cur.list.length*100)+'%';
-  document.getElementById('why').classList.add('show');
-  document.getElementById('nextbtn').classList.add('show');
-  setTimeout(()=>{ const w=document.getElementById('why'); if(w&&w.scrollIntoView) w.scrollIntoView({behavior:'smooth',block:'center'}); },300);
+  cur.picked[cur.idx]=i; cur.okByIdx[cur.idx]=correct;
+  if(correct){ streak++; cur.score++; beep(true); }
+  else { streak=0; beep(false); cur.wrong.push({q,picked:i}); }
+  opts.forEach((o,j)=>{
+    o.classList.add('locked');
+    if(j===q.answer){ o.classList.add('correct'); o.querySelector('.qz-mark').textContent='✓'; o.querySelector('.qz-mark').classList.add('ok'); }
+    else if(j===i){ o.classList.add('wrong'); o.querySelector('.qz-mark').textContent='✕'; o.querySelector('.qz-mark').classList.add('no'); }
+    else o.classList.add('dim');
+  });
+  const whyText=correct?(dt<=10?'⚡ Fast answer — '+dt+'s! ':'')+'Correct! '+q.rationale
+    :'Not quite. The correct answer is '+['A','B','C','D'][q.answer]+'. '+q.rationale;
+  cur.whyByIdx[cur.idx]=whyText;
+  document.getElementById('why-text').textContent=whyText;
+  document.getElementById('why').hidden=false;
+  const prog=document.querySelector('.qz-progress i');
+  if(prog) prog.style.width=Math.round((cur.idx+1)/cur.list.length*100)+'%';
+  const nb=document.getElementById('nextbtn');
+  nb.disabled=false;
+  nb.textContent=cur.idx+1===cur.list.length?'See My Result ›':'Next ›';
+  renderPalette();
+  setTimeout(()=>{ const w=document.getElementById('why'); if(w&&w.scrollIntoView) w.scrollIntoView({behavior:'smooth',block:'nearest'}); },300);
 }
-function nextQ(){ cur.idx++; if(cur.idx>=cur.list.length) renderResult(false); else renderQuiz(); }
+function nextQ(){
+  if(cur.picked[cur.idx]===undefined) return;
+  cur.idx++; if(cur.idx>=cur.list.length) renderResult(false); else renderQuiz();
+}
 function renderResult(timeUp){
+  screen='result';
   if(cur.timerId) clearInterval(cur.timerId);
   const total=cur.list.length, pct=Math.round(cur.score/total*100);
   if(cur.no) saveBest(cur.no,pct); else saveBest(cur.mode==='paper'?'paper':'mock',pct);
@@ -588,26 +427,52 @@ function renderResult(timeUp){
     const st=byCh[c], p=Math.round(st.correct/st.total*100);
     const title=CHAPTERS.find(x=>x.n===c).title;
     const weak=c===weakest&&p<60;
-    return `<div class="chrow" onclick="toggleChRow(${c})"><span><b>Chapter ${c} — ${esc(title)}</b><br>${st.total} MCQs came · ${st.correct} correct · ${p}% ${weak?'<span class="weak">· 📖 Read this chapter again</span>':''}</span><span>›</span></div><div class="chdetail" id="chd${c}" style="display:none"></div>`;
+    return `<div class="qz-rev" onclick="toggleChRow(${c})" style="cursor:pointer"><span class="dot ${p>=60?'ok':'no'}">${p>=60?'✓':'✕'}</span><span><b>Chapter ${c} — ${esc(title)}</b><small>${st.total} MCQs came · ${st.correct} correct · ${p}%${weak?' · Read this chapter again':''}</small></span></div><div class="chdetail" id="chd${c}" style="display:none"></div>`;
   }).join('');
-  const C=(2*Math.PI*54).toFixed(1);
-  const arc=((pct/100)*2*Math.PI*54).toFixed(1);
+  const review=cur.answers.map((a,ix)=>{
+    return `<div class="qz-rev"><span class="dot ${a.ok?'ok':'no'}">${a.ok?'✓':'✕'}</span><span><b>Q${ix+1}. ${esc(a.q.q)}</b><small>${a.ok?'Your answer: ':'Your answer: '}${esc(a.q.options[a.picked])}${a.ok?'':' · Correct answer: '+esc(a.q.options[a.q.answer])} — Why? ${esc(a.q.rationale)}</small></span></div>`;
+  }).join('');
+  const off=Math.round(402*(1-pct/100));
+  const weakTitle=weakest!=null?CHAPTERS.find(x=>x.n===weakest).title:'';
   document.getElementById('view').innerHTML = `
-  <div style="padding:30px 0 0;text-align:center;position:relative;z-index:2"><div class="eyebrow">TA SERIES • NU257</div></div>
-  <div class="result glass"><div style="font-size:52px">${emoji}</div><h2>${esc(cur.title)}</h2>
-  <div class="ring-wrap"><svg width="150" height="150" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="none" stroke="#fbeef2" stroke-width="11"/><circle cx="60" cy="60" r="54" fill="none" stroke="#7a0a28" stroke-width="11" stroke-linecap="round" stroke-dasharray="${arc} ${C}"/></svg><div class="ring-num"><b>${pct}%</b><span>${cur.score} of ${total} correct</span></div></div>
-  <p>${msg}</p>
-  <div class="statgrid">
-    <div class="stat">⏱ Time<b>${fmtTime(secs)}</b></div>
-    <div class="stat">⚡ Fast answers<b>${cur.fast}</b></div>
-    <div class="stat">Avg / question<b>${avg}s</b></div>
-    <div class="stat">Wrong<b>${cur.wrong.length}</b></div>
-  </div>
-  ${weakest!=null&&weakestPct<60?`<p style="margin-top:14px"><b>📖 Weakest chapter: Chapter ${weakest}</b> — only ${weakestPct}% correct. Read it again first.</p>`:''}
-  <div style="text-align:left;margin-top:16px"><div class="optlabel" style="margin-top:0">YOUR CHAPTERS — TAP TO SEE THE MCQs</div>${rows}</div>
-  <button class="btn grad liquid fill" onclick="retry()">Try Again</button>
-  <button class="btn plain" onclick="renderCover()">Back</button>
-  <div class="foot" style="padding:14px 0 4px">© 2026 Tufail Ahmad · TA SERIES · Burgundy &amp; Navy</div></div>`;
+  <div class="qz">
+    <div class="qz-hero" style="padding-bottom:58px">
+      <span class="crumb">Your result · Nursing Ethics</span>
+      <h1>Well done.</h1>
+      <p>Here is how you did — and exactly what to revise next.</p>
+    </div>
+    <div class="qz-card">
+      <div class="qz-ring-wrap">
+        <svg class="qz-ring" viewBox="0 0 150 150" aria-hidden="true">
+          <circle class="bg" cx="75" cy="75" r="64" fill="none" stroke-width="11"/>
+          <circle class="fg" cx="75" cy="75" r="64" fill="none" stroke-width="11" stroke-dasharray="402" stroke-dashoffset="${off}" transform="rotate(-90 75 75)"/>
+        </svg>
+        <div class="qz-score" style="margin-top:-98px"><span id="score-num">${cur.score}</span><small> / ${total} correct</small></div>
+        <div style="height:64px"></div>
+        <span class="qz-verdict" id="verdict">${pct>=50?'Passed':'Keep practising'} — ${pct}%</span>
+      </div>
+      <div class="qz-stats" style="margin-top:18px">
+        <div class="qz-stat"><b>${cur.score}</b><span>Correct</span></div>
+        <div class="qz-stat"><b>${cur.wrong.length}</b><span>Wrong</span></div>
+        <div class="qz-stat"><b>${fmtTime(secs)}</b><span>Time used</span></div>
+        <div class="qz-stat"><b>${pct}%</b><span>Score</span></div>
+      </div>
+      ${weakest!=null&&weakestPct<60?`<div class="qz-weak"><b>Weakest chapter: Chapter ${weakest} — ${esc(weakTitle)}.</b><br>Only ${weakestPct}% correct. Read it again first, then retake the chapter practice.</div>`:''}
+      <div style="text-align:left;margin-top:16px"><div class="optlabel" style="margin-top:0">YOUR CHAPTERS — TAP TO SEE THE MCQs</div>${rows}</div>
+      <div style="height:16px"></div>
+      <button class="btn btn-lime" onclick="retry()">Try Again</button>
+      <div style="height:10px"></div>
+      <button class="btn btn-ghost" onclick="renderCover()">Back to Nursing Ethics</button>
+      <div style="height:10px"></div>
+      <a class="btn btn-outline" href="https://wa.me/923055959410?text=TA%20SERIES%20feedback%3A%20">Give Feedback</a>
+      <p class="kbd-note" style="margin-top:16px;text-align:center">© 2026 Tufail Ahmad · TA SERIES</p>
+    </div>
+    <div class="wrap no-nav" style="padding-top:18px">
+      <div class="sec-head" style="margin-top:8px"><h2>Question-by-question review</h2></div>
+      <div class="qz-review">${review}</div>
+      <p class="kbd-note" style="margin-top:16px">Your best score is saved on this phone.</p>
+    </div>
+  </div>`;
   window.scrollTo(0,0);
 }
 function toggleChRow(c){
