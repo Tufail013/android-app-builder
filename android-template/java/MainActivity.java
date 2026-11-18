@@ -177,7 +177,11 @@ public class MainActivity extends AppCompatActivity {
       @Override public void onPageStarted(WebView v, String u, Bitmap fav) { if (anim) v.setAlpha(0.2f); }
       @Override public void onPageFinished(WebView v, String u) { swipe.setRefreshing(false); v.animate().alpha(1f).setDuration(250).start(); }
       @Override public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) {
-        if (r.isForMainFrame() && w.optBoolean("noNet", true) && !online()) showNoNet();
+        if (r.isForMainFrame() && w.optBoolean("noNet", true) && !online()) {
+          // Don't loop if the offline page itself ever failed to load.
+          String u = r.getUrl() == null ? "" : r.getUrl().toString();
+          if (!u.contains("offline.html")) showNoNet();
+        }
       }
       @Override public boolean onRenderProcessGone(WebView v, RenderProcessGoneDetail detail) {
         // If the WebView's renderer dies the page goes blank white. Reload the
@@ -323,7 +327,9 @@ public class MainActivity extends AppCompatActivity {
     } catch (Exception e) { return true; }
   }
   void showNoNet() {
-    new AlertDialog.Builder(this).setTitle("No internet").setMessage("Check your connection and try again.").setPositiveButton("Retry", (x, y) -> web.reload()).setNegativeButton("Close", null).show();
+    // Show the app's own offline page instead of the browser's ugly
+    // "Webpage not available" error, which also shows the website address.
+    web.loadUrl("https://" + HOST + "/assets/www/offline.html");
   }
 
   void handleBack() {
