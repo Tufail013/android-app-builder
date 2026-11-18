@@ -3,53 +3,63 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
 <title>You&rsquo;re offline — TA SERIES</title>
 <link rel="stylesheet" href="ta.css">
 <style>
-body{background:#0B0B0C;color:#FFFFFF}
-.off-wrap{max-width:480px;margin:0 auto;padding:0 16px 40px;text-align:center}
-.off-hero{background:#0B0B0C;color:#fff;padding:44px 20px 60px}
-.off-hero h1{font-size:28px;font-weight:800;margin-top:14px;color:#fff}
-.off-hero h1 .lime{color:#C6F432}
-.off-hero p{font-size:14.5px;color:rgba(255,255,255,.75);line-height:1.65;margin:10px auto 0;max-width:320px}
-.off-ic{width:72px;height:72px;margin:0 auto;border-radius:20px;background:#C6F432;display:grid;place-items:center}
-.off-ic svg{width:36px;height:36px;color:#0B0B0C}
-.off-card{background:#17171A;border:1px solid rgba(255,255,255,.14);border-radius:22px;box-shadow:0 10px 28px rgba(0,0,0,.45);padding:20px;margin:-30px 16px 0;position:relative;color:#fff}
-.off-card h2{font-size:16px;font-weight:800;text-align:left;color:#fff}
-.off-card .kbd-note{text-align:left}
+body{background:#E9EEF3;color:#12304A}
+.off-wrap{max-width:480px;margin:0 auto;padding:44px 16px 40px;text-align:center}
+.off-ic{width:84px;height:84px;margin:0 auto 18px;border-radius:28px;display:flex;align-items:center;justify-content:center;color:#0B6B75;background:#E4EAF0;box-shadow:inset 3px 3px 7px #C2CBD5,inset -3px -3px 7px #FFF}
+.off-ic svg{width:42px;height:42px}
+.off-wrap h1{font-size:26px;font-weight:800;color:#12304A}
+.off-wrap p{font-size:14.5px;color:#566676;line-height:1.65;margin:10px auto 0;max-width:320px}
+.off-card{margin-top:22px;text-align:left}
+.off-card h2{font-size:16px;font-weight:800;color:#12304A;text-align:left}
+#retryBtn{min-height:56px;font-size:16px}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 </style>
 </head>
 <body>
-<div class="off-hero">
+<div class="off-wrap">
   <div class="off-ic">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M8.5 16.5a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 3.6-2.3M12 20h.01M19 12.9a10 10 0 0 0-2.1-2.3M10.7 5.1A15 15 0 0 1 22 9M2 9a15 15 0 0 1 5.6-3.9"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22.61 16.95A5 5 0 0 0 18 10h-1.26a8 8 0 0 0-7.05-6M5 5a8 8 0 0 0 4 15h9a5 5 0 0 0 1.7-.3"/><path d="m1 1 22 22"/></svg>
   </div>
-  <h1>You&rsquo;re <span class="lime">offline</span></h1>
-  <p>No internet connection right now. Your offline tests still work — and everything you already downloaded is still on your phone.</p>
-</div>
+  <h1>You&rsquo;re offline</h1>
+  <p>No internet connection right now. Take your time — your offline tests still work, and everything you already downloaded is still on your phone.</p>
 
-<div class="off-card">
-  <a class="btn btn-lime" href="https://taseriesofficial.github.io/?app=1" onclick="if(window.Android&&Android.retry){Android.retry();return false;}">Try again</a>
+  <div style="height:22px"></div>
+  <button class="btn btn-teal btn-block" id="retryBtn" type="button" onclick="retryNow()">Retry</button>
   <div style="height:10px"></div>
-  <a class="btn btn-black" href="https://appassets.androidplatform.net/assets/www/index.html" onclick="location.replace('https://appassets.androidplatform.net/assets/www/index.html');return false;">Back to home</a>
-  <div class="divider"></div>
-  <h2>Works without internet</h2>
-  <div style="height:12px"></div>
-  <a class="row" href="https://appassets.androidplatform.net/assets/www/quiz-ethics.html" onclick="location.replace('https://appassets.androidplatform.net/assets/www/quiz-ethics.html');return false;" style="box-shadow:none;text-align:left">
-    <span class="tile quiz"><b style="font-size:11px">QUIZ</b></span>
-    <span class="body"><b>Nursing Ethics</b><span>370 MCQs &middot; 9 chapters</span></span>
-    <span class="chev">&rsaquo;</span>
-  </a>
-  <a class="row" href="https://appassets.androidplatform.net/assets/www/quiz-psych.html" onclick="location.replace('https://appassets.androidplatform.net/assets/www/quiz-psych.html');return false;" style="box-shadow:none;text-align:left">
-    <span class="tile quiz"><b style="font-size:11px">QUIZ</b></span>
-    <span class="body"><b>Applied Developmental Psychology</b><span>490 MCQs &middot; 13 chapters</span></span>
-    <span class="chev">&rsaquo;</span>
-  </a>
-  <p class="kbd-note" style="margin-top:14px">Tip: turn your internet back on and tap &ldquo;Try again&rdquo; to reload the website. If it still does not load, check your Wi-Fi or mobile data.</p>
+  <a class="btn btn-raise" href="https://appassets.androidplatform.net/assets/www/index.html" onclick="location.replace('https://appassets.androidplatform.net/assets/www/index.html');return false;">Back to home</a>
+
+  <div class="off-card raise">
+    <h2>Works without internet</h2>
+    <div style="height:12px"></div>
+    <a class="row" href="https://appassets.androidplatform.net/assets/www/quiz-ethics.html" onclick="location.replace('https://appassets.androidplatform.net/assets/www/quiz-ethics.html');return false;" style="box-shadow:none;text-align:left">
+      <span class="tile quiz"><b style="font-size:11px">QUIZ</b></span>
+      <span class="body"><b>Nursing Ethics</b><span>370 MCQs &middot; 9 chapters</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <a class="row" href="https://appassets.androidplatform.net/assets/www/quiz-psych.html" onclick="location.replace('https://appassets.androidplatform.net/assets/www/quiz-psych.html');return false;" style="box-shadow:none;text-align:left">
+      <span class="tile quiz"><b style="font-size:11px">QUIZ</b></span>
+      <span class="body"><b>Applied Developmental Psychology</b><span>490 MCQs &middot; 13 chapters</span></span>
+      <span class="chev">&rsaquo;</span>
+    </a>
+    <p class="kbd-note" style="margin-top:14px">Tip: turn your internet back on and tap &ldquo;Retry&rdquo; to reload the page you were on. If it still does not load, check your Wi-Fi or mobile data.</p>
+  </div>
 </div>
+<script>
+function retryNow(){
+  // The app reloads the page that failed, but only when the phone is back
+  // online (Android.retry handles that). Without the bridge, just reload.
+  try{
+    if(window.Android && Android.retry){ Android.retry(); return; }
+  }catch(e){}
+  location.reload();
+}
+</script>
 <script>
 // TA SERIES back handling: from the offline page, back goes straight home
 // (without adding history, so it can never loop home → offline → home).
