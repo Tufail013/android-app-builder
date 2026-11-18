@@ -7,15 +7,11 @@ import android.graphics.*;
 import android.net.*;
 import android.os.*;
 import android.provider.MediaStore;
-import android.speech.tts.TextToSpeech;
 import android.view.*;
 import android.webkit.*;
 import android.widget.*;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.biometric.BiometricManager;
-import androidx.biometric.BiometricPrompt;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -29,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends AppCompatActivity {
   static final String HOST = "appassets.androidplatform.net";
-  static final String CH = "app_channel";
   JSONObject root, d, w, f, sp;
   WebView web;
   WebView popup;
@@ -37,10 +32,9 @@ public class MainActivity extends AppCompatActivity {
   ProgressBar bar;
   FrameLayout main;
   LinearLayout lay;
-  TextToSpeech tts;
-  String pending;
   ValueCallback<Uri[]> chooser;
   boolean anim;
+  String failedUrl;
 
   static String read(InputStream in) throws IOException {
     ByteArrayOutputStream o = new ByteArrayOutputStream();
@@ -61,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
       d = root.getJSONObject("disp"); w = root.getJSONObject("wv"); f = root.getJSONObject("feat"); sp = root.getJSONObject("splash");
     } catch (Exception e) { throw new RuntimeException(e); }
     anim = !f.optString("anim", "fade").equals("none");
-    getSharedPreferences("cfg", 0).edit().putBoolean("exact", f.optBoolean("exactAlarms")).apply();
     if (anim) overridePendingTransition(R.anim.enter, R.anim.exit);
     Window win = getWindow();
     String o = d.optString("orient", "auto");
@@ -164,6 +157,11 @@ public class MainActivity extends AppCompatActivity {
         Uri u = r.getUrl();
         if (HOST.equals(u.getHost())) return false;
         String h = u.getHost() == null ? "" : u.getHost();
+        // TA SERIES: a Drive file link (drive.google.com/file/d/<ID>/...) opens
+        // Google's viewer. Convert it to a direct download so the student gets
+        // the file through the app's DownloadListener instead of the viewer.
+        String dl = driveDownloadUrl(u);
+        if (dl != null) { web.loadUrl(dl); return true; }
         // TA SERIES: keep the site and Google Drive inside the app so files open
         // in-app and downloads go through the app's DownloadListener. Everything
         // else (WhatsApp, mail, other sites) still opens in the browser.
@@ -175,12 +173,29 @@ public class MainActivity extends AppCompatActivity {
         return true;
       }
       @Override public void onPageStarted(WebView v, String u, Bitmap fav) { if (anim) v.setAlpha(0.2f); }
-      @Override public void onPageFinished(WebView v, String u) { swipe.setRefreshing(false); v.animate().alpha(1f).setDuration(250).start(); }
+      @Override public void onPageFinished(WebView v, String u) {
+        swipe.setRefreshing(false); v.animate().alpha(1f).setDuration(250).start();
+        // TA SERIES app mode: when the website opens inside the app, hide its
+        // own header and footer so the app home and the website feel like one
+        // home. The site also supports this natively (?app=1, see app-mode.js);
+        // this injection is the fallback until that site update is published.
+        if (u != null && u.startsWith("https://taseriesofficial.github.io/")) {
+          v.evaluateJavascript("(function(){try{"
+            + "document.documentElement.classList.add('in-app');"
+            + "if(!document.getElementById('ta-app-mode')){var s=document.createElement('style');s.id='ta-app-mode';"
+            + "s.textContent='.site-header,.site-footer{display:none!important}';"
+            + "(document.head||document.documentElement).appendChild(s);}"
+            + "if(!window.taBack){window.taBack=function(){try{"
+            + "if(typeof state!=='undefined'&&state&&state.path&&state.path.length>0&&!state.q&&typeof goTo==='function'){goTo(state.path.slice(0,-1));return true;}"
+            + "}catch(e){} return false;};}"
+            + "}catch(e){}})();", null);
+        }
+      }
       @Override public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) {
         if (r.isForMainFrame() && w.optBoolean("noNet", true) && !online()) {
           // Don't loop if the offline page itself ever failed to load.
           String u = r.getUrl() == null ? "" : r.getUrl().toString();
-          if (!u.contains("offline.html")) showNoNet();
+          if (!u.contains("offline.html")) { failedUrl = u; showNoNet(); }
         }
       }
       @Override public boolean onRenderProcessGone(WebView v, RenderProcessGoneDetail detail) {
@@ -222,7 +237,8 @@ public class MainActivity extends AppCompatActivity {
             popup = new WebView(MainActivity.this);
             popup.setWebViewClient(new WebViewClient() {
               @Override public boolean shouldOverrideUrlLoading(WebView pv, WebResourceRequest r) {
-                web.loadUrl(r.getUrl().toString());
+                String dl = driveDownloadUrl(r.getUrl());
+                web.loadUrl(dl != null ? dl : r.getUrl().toString());
                 return true;
               }
               @Override public void onPageStarted(WebView pv, String url, Bitmap fav) {
@@ -256,7 +272,9 @@ public class MainActivity extends AppCompatActivity {
         req.setTitle(name);
         req.setDescription("TA SERIES download");
         req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        req.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
+        // TA SERIES: every download goes to the phone's shared Downloads folder,
+        // inside a "TA SERIES" subfolder, so students always know where to find it.
+        req.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "TA SERIES/" + name);
         req.allowScanningByMediaScanner();
         ((DownloadManager) getSystemService(DOWNLOAD_SERVICE)).enqueue(req);
         Toast.makeText(MainActivity.this, "Download started: " + name, Toast.LENGTH_SHORT).show();
@@ -268,9 +286,6 @@ public class MainActivity extends AppCompatActivity {
     web.loadUrl("https://" + HOST + "/assets/www/index.html");
 
     if (sp.optBoolean("on", true)) addSplash();
-    if (Build.VERSION.SDK_INT >= 33 && (f.optBoolean("notify") || f.optBoolean("reminders")))
-      requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 5);
-    if (f.optBoolean("biometric")) { lay.setVisibility(View.INVISIBLE); lock(); }
   }
 
   void addSplash() {
@@ -308,18 +323,6 @@ public class MainActivity extends AppCompatActivity {
     new Handler(Looper.getMainLooper()).postDelayed(() -> o.animate().alpha(0f).setDuration(fade).withEndAction(() -> main.removeView(o)).start(), sp.optInt("dur", 2000));
   }
 
-  void lock() {
-    int auth = Build.VERSION.SDK_INT >= 30 ? (BiometricManager.Authenticators.BIOMETRIC_WEAK | BiometricManager.Authenticators.DEVICE_CREDENTIAL) : BiometricManager.Authenticators.BIOMETRIC_WEAK;
-    if (BiometricManager.from(this).canAuthenticate(auth) != BiometricManager.BIOMETRIC_SUCCESS) { lay.setVisibility(View.VISIBLE); return; }
-    BiometricPrompt.PromptInfo.Builder pi = new BiometricPrompt.PromptInfo.Builder().setTitle(getString(R.string.app_name)).setAllowedAuthenticators(auth);
-    if (Build.VERSION.SDK_INT < 30) pi.setNegativeButtonText("Cancel");
-    BiometricPrompt bp = new BiometricPrompt(this, ContextCompat.getMainExecutor(this), new BiometricPrompt.AuthenticationCallback() {
-      @Override public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult r) { lay.setVisibility(View.VISIBLE); }
-      @Override public void onAuthenticationError(int code, CharSequence msg) { finish(); }
-    });
-    bp.authenticate(pi.build());
-  }
-
   boolean online() {
     try {
       NetworkInfo n = ((ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
@@ -332,94 +335,58 @@ public class MainActivity extends AppCompatActivity {
     web.loadUrl("https://" + HOST + "/assets/www/offline.html");
   }
 
+  // TA SERIES: turn a Drive file-viewer link into a direct download link.
+  // Returns the converted URL, or null when the URL is not a Drive file link.
+  static String driveDownloadUrl(Uri u) {
+    if (u == null || !"drive.google.com".equals(u.getHost())) return null;
+    String p = u.getPath() == null ? "" : u.getPath();
+    if (!p.startsWith("/file/d/")) return null;
+    String[] parts = p.split("/");
+    if (parts.length < 4 || parts[3].isEmpty()) return null;
+    return "https://drive.google.com/uc?export=download&id=" + parts[3];
+  }
+
+  // TA SERIES: the JavaScript bridge is exposed to every page the WebView loads,
+  // including Google pages. Only our own pages (the bundled app pages and the
+  // TA SERIES website) may use the bridge methods that do something.
+  boolean trusted() {
+    try {
+      String u = web.getUrl();
+      return u != null && (u.startsWith("https://" + HOST + "/") || u.startsWith("https://taseriesofficial.github.io/"));
+    } catch (Exception e) { return false; }
+  }
+
   void handleBack() {
-    if (w.optBoolean("backNav", true) && web.canGoBack()) { web.goBack(); return; }
-    if (w.optBoolean("exitConfirm", true)) {
-      new AlertDialog.Builder(this).setMessage("Exit app?").setPositiveButton("Exit", (x, y) -> finish()).setNegativeButton("Stay", null).show();
-      return;
-    }
-    finish();
+    // 1. Let the current page handle back first: a quiz goes up one screen
+    // (and asks before leaving a running test), the website goes up one
+    // folder level. The page answers true only when it handled the press.
+    web.evaluateJavascript("(function(){try{return window.taBack?window.taBack():false;}catch(e){return false;}})()", handled -> {
+      if ("true".equals(handled)) return;
+      // 2. Otherwise use WebView history.
+      if (w.optBoolean("backNav", true) && web.canGoBack()) { web.goBack(); return; }
+      // 3. Root: ask before exiting.
+      if (w.optBoolean("exitConfirm", true)) {
+        new AlertDialog.Builder(MainActivity.this).setMessage("Exit app?").setPositiveButton("Exit", (x, y) -> finish()).setNegativeButton("Stay", null).show();
+        return;
+      }
+      finish();
+    });
   }
   @Override public void finish() { super.finish(); if (anim) overridePendingTransition(R.anim.enter, R.anim.exit); }
   @Override protected void onActivityResult(int rq, int rs, Intent it) {
     super.onActivityResult(rq, rs, it);
     if (rq == 77 && chooser != null) { chooser.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(rs, it)); chooser = null; }
   }
-  @Override protected void onDestroy() { if (tts != null) tts.shutdown(); if (popup != null) popup.destroy(); super.onDestroy(); }
-
-  static void show(Context c, String t, String m) {
-    NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
-    if (Build.VERSION.SDK_INT >= 26) nm.createNotificationChannel(new NotificationChannel(CH, "Notifications", NotificationManager.IMPORTANCE_DEFAULT));
-    PendingIntent pi = PendingIntent.getActivity(c, 0, new Intent(c, MainActivity.class), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-    Notification.Builder nb = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(c, CH) : new Notification.Builder(c);
-    nb.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(t).setContentText(m).setContentIntent(pi).setAutoCancel(true);
-    nm.notify((int) (System.currentTimeMillis() % 100000000L), nb.build());
-  }
-  static PendingIntent alarmIntent(Context c, String id, String t, String m) {
-    Intent in = new Intent(c, AlarmReceiver.class).putExtra("id", id).putExtra("t", t).putExtra("m", m);
-    return PendingIntent.getBroadcast(c, id.hashCode(), in, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-  }
-  static void setAlarm(Context c, String id, long ts, String t, String m, boolean save) {
-    PendingIntent pi = alarmIntent(c, id, t, m);
-    AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
-    try {
-      if (!c.getSharedPreferences("cfg", 0).getBoolean("exact", false) || (Build.VERSION.SDK_INT >= 31 && !am.canScheduleExactAlarms())) am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, ts, pi);
-      else am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, ts, pi);
-    } catch (Exception e) { am.set(AlarmManager.RTC_WAKEUP, ts, pi); }
-    if (save) {
-      try {
-        JSONObject o = new JSONObject();
-        o.put("ts", ts); o.put("t", t); o.put("m", m);
-        c.getSharedPreferences("alarms", 0).edit().putString(id, o.toString()).apply();
-      } catch (Exception e) { }
-    }
-  }
+  @Override protected void onDestroy() { if (popup != null) popup.destroy(); super.onDestroy(); }
 
   class Bridge {
     @JavascriptInterface public void toast(final String m) {
       if (!f.optBoolean("toast")) return;
       runOnUiThread(() -> Toast.makeText(MainActivity.this, m, Toast.LENGTH_SHORT).show());
     }
-    @JavascriptInterface public void vibrate(int ms) {
-      if (!f.optBoolean("vibrate")) return;
-      Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-      if (v != null) v.vibrate(Math.min(Math.max(ms, 10), 2000));
-    }
-    @JavascriptInterface public void notify(String t, String m) {
-      if (f.optBoolean("notify") || f.optBoolean("reminders")) show(MainActivity.this, t, m);
-    }
-    @JavascriptInterface public void schedule(String id, long ts, String t, String m) {
-      if (f.optBoolean("reminders")) setAlarm(MainActivity.this, id, ts, t, m, true);
-    }
-    @JavascriptInterface public void cancel(String id) {
-      if (!f.optBoolean("reminders")) return;
-      ((AlarmManager) getSystemService(ALARM_SERVICE)).cancel(alarmIntent(MainActivity.this, id, "", ""));
-      getSharedPreferences("alarms", 0).edit().remove(id).apply();
-    }
-    @JavascriptInterface public void share(final String text) {
-      if (!f.optBoolean("share")) return;
-      runOnUiThread(() -> {
-        Intent s = new Intent(Intent.ACTION_SEND);
-        s.setType("text/plain");
-        s.putExtra(Intent.EXTRA_TEXT, text);
-        startActivity(Intent.createChooser(s, null));
-      });
-    }
-    @JavascriptInterface public void copy(final String text) {
-      if (!f.optBoolean("share")) return;
-      runOnUiThread(() -> ((ClipboardManager) getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("text", text)));
-    }
-    @JavascriptInterface public void speak(final String text) {
-      if (!f.optBoolean("tts")) return;
-      runOnUiThread(() -> {
-        if (tts == null) {
-          pending = text;
-          tts = new TextToSpeech(MainActivity.this, st -> { if (st == TextToSpeech.SUCCESS && pending != null) tts.speak(pending, TextToSpeech.QUEUE_FLUSH, null, "u"); });
-        } else tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "u");
-      });
-    }
     @JavascriptInterface public String saveFile(String name, String mime, String text) {
       if (!f.optBoolean("files")) return "disabled";
+      if (!trusted()) return "disabled";
       try {
         name = new File(name).getName();
         byte[] data = text.getBytes(StandardCharsets.UTF_8);
@@ -438,25 +405,27 @@ public class MainActivity extends AppCompatActivity {
         return fl.getPath();
       } catch (Exception e) { return "error: " + e.getMessage(); }
     }
-    @JavascriptInterface public String buildStandalone(String html, String name) {
-      if (!f.optBoolean("files")) return "disabled";
-      return ApkPackager.build(MainActivity.this, html, name);
-    }
-    @JavascriptInterface public String buildStandalone2(String html, String appName, String pkg) {
-      if (!f.optBoolean("files")) return "disabled";
-      return ApkPackager.build2(MainActivity.this, html, appName, pkg);
-    }
-    @JavascriptInterface public String openStandalone() {
-      return ApkPackager.openLast(MainActivity.this);
-    }
-    @JavascriptInterface public String cloneApk(String sourceName, String appName, String pkg) {
-      if (!f.optBoolean("files")) return "disabled";
-      return ApkPackager.cloneApk(MainActivity.this, sourceName, appName, pkg);
-    }
-    @JavascriptInterface public String openClone() {
-      return ApkPackager.openClone(MainActivity.this);
+    // TA SERIES: the offline page's "Try again" button. Reloads the page that
+    // failed, but only when the phone is back online — otherwise it says so
+    // instead of failing again and looping back to the offline page.
+    @JavascriptInterface public void retry() {
+      if (!trusted()) return;
+      runOnUiThread(() -> {
+        if (online() && failedUrl != null && !failedUrl.isEmpty()) {
+          String u = failedUrl; failedUrl = null;
+          web.loadUrl(u);
+        } else {
+          Toast.makeText(MainActivity.this, "Still offline — connect to the internet and try again.", Toast.LENGTH_SHORT).show();
+        }
+      });
     }
     @JavascriptInterface public boolean isOnline() { return f.optBoolean("info") && online(); }
     @JavascriptInterface public String appVersion() { return f.optBoolean("info") ? root.optJSONObject("app").optString("vn") : ""; }
+    // TA SERIES: the installed version code, read from the package itself, so
+    // the home page update check can never drift from the real version.
+    @JavascriptInterface public int versionCode() {
+      if (!trusted()) return 0;
+      try { return getPackageManager().getPackageInfo(getPackageName(), 0).versionCode; } catch (Exception e) { return 0; }
+    }
   }
 }
