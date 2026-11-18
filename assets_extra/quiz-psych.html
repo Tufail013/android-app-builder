@@ -300,6 +300,14 @@ border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 0 rgba(255,255,255
 .ring-num b{font-size:42px;color:#7A1233}
 .ring-num span{font-size:12px;color:#5b6478;font-weight:700}
 </style>
+
+<style>
+/* TA SERIES app fix: the splash title, text and Enter button use a fade-up
+   animation that starts at opacity 0. On phones with animations turned off
+   they stay invisible forever, so the quiz looks like a blank white screen.
+   Force them visible no matter what. */
+#splash h1,#splash p,#splash .enter{animation:none!important;opacity:1!important;transform:none!important}
+</style>
 </head>
 <body>
 <div id="app">
@@ -621,6 +629,13 @@ function toggleChRow(c){
   d.style.display=d.style.display==='none'?'block':'none';
 }
 function retry(){ if(cur.mode==='mock'){ mockSetup=cur.setup; startMock(); } else if(cur.mode==='paper'){ paperSetup=cur.setup; startPaper(); } else { chSetup=cur.setup; chN=cur.no; startChapter(cur.no); } }
+</script>
+
+<script>
+/* TA SERIES app fix: if the splash is still showing after 3 seconds (the
+   user has not tapped Enter), enter the quiz automatically so the test
+   can never get stuck on a white screen. */
+setTimeout(function(){ try{ if(typeof enterApp==='function'){ enterApp(); } }catch(e){} }, 3000);
 </script>
 </body>
 </html>
